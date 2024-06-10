@@ -10,6 +10,11 @@ export interface EditorProps {
     "language" | "theme"
   >;
 }
+// TODO: do this better
+const ws = new WebSocket("http://localhost:6969");
+ws.onopen = () => {
+  ws.send("hello, world");
+};
 
 export const Editor = (props: EditorProps): JSX.Element => {
   const [editor, setEditor] =
