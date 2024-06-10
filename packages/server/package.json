@@ -1,0 +1,16 @@
+{
+  "name": "@mock-me/server",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "start": "tsx ./src/index.ts"
+  },
+  "author": "Kirin Patel <contact@kirinpatel.com>",
+  "license": "MIT",
+  "dependencies": {
+    "fastify": "^4.27.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.15.1"
+  }
+}
