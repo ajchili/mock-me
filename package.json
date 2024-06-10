@@ -1,26 +1,13 @@
 {
-  "name": "@mock-me/asset",
-  "version": "1.0.0",
-  "description": "Web application to make it easier to conduct mock interviews.",
-  "type": "module",
+  "name": "@mock-me/empty",
+  "packageManager": "npm@10.2.4",
   "scripts": {
-    "start": "vite"
+    "start": "turbo run start"
   },
-  "author": "Kirin Patel <contact@kirinpatel.com>",
-  "license": "MIT",
-  "devDependencies": {
-    "@tsconfig/node20": "^20.1.4",
-    "@types/react": "^18.3.2",
-    "@types/react-dom": "^18.3.0",
-    "@vitejs/plugin-react": "^4.2.1",
-    "typescript": "^5.4.5",
-    "vite": "^5.2.11"
-  },
+  "workspaces": [
+    "packages/*"
+  ],
   "dependencies": {
-    "monaco-editor": "^0.48.0",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-jss": "^10.10.0",
-    "react-router-dom": "^6.23.1"
+    "turbo": "^2.0.3"
   }
 }
