@@ -4,9 +4,24 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Mock Me 👉🏽👈🏽</title>
+
+    <style>
+      html,
+      body {
+        padding: 0;
+        margin: 0;
+      }
+    </style>
   </head>
   <body>
     <div id="app" />
+    <script type="module">
+      import RefreshRuntime from "/@react-refresh";
+      RefreshRuntime.injectIntoGlobalHook(window);
+      window.$RefreshReg$ = () => {};
+      window.$RefreshSig$ = () => (type) => type;
+      window.__vite_plugin_react_preamble_installed__ = true;
+    </script>
     <script type="module" src="/src/index.tsx"></script>
   </body>
 </html>

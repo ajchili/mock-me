@@ -12,12 +12,15 @@
     "@tsconfig/node20": "^20.1.4",
     "@types/react": "^18.3.2",
     "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.2.1",
     "typescript": "^5.4.5",
     "vite": "^5.2.11"
   },
   "dependencies": {
     "monaco-editor": "^0.48.0",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react-dom": "^18.3.1",
+    "react-jss": "^10.10.0",
+    "react-router-dom": "^6.23.1"
   }
 }
