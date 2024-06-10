@@ -1,4 +1,5 @@
 import { createRoot } from "react-dom/client";
+import { Router } from "./components/Router/Router.js";
 
 let $app = document.getElementById("app");
 
@@ -8,4 +9,4 @@ if (!$app) {
 }
 
 const root = createRoot($app);
-root.render(<h1>Hello, world!</h1>);
+root.render(<Router />);
