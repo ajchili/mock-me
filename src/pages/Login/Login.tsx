@@ -5,6 +5,10 @@ export const Login = (): JSX.Element => {
   const styles = useStyles();
   const navigate = useNavigate();
 
+  const navigateToCandidate = () => {
+    navigate("/candidate");
+  };
+
   const navigateToInterview = () => {
     navigate("/interview");
   };
@@ -14,7 +18,7 @@ export const Login = (): JSX.Element => {
       <div className={styles.container}>
         <div className={styles.welcomeCard}>
           Welcome
-          <button onClick={navigateToInterview}>I am the Candidate 🧑‍🎓</button>
+          <button onClick={navigateToCandidate}>I am the Candidate 🧑‍🎓</button>
           <button onClick={navigateToInterview}>I am the Interviewer 🧑‍🏫</button>
         </div>
       </div>
