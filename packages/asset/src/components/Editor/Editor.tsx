@@ -10,57 +10,90 @@ export interface EditorProps {
     "language" | "theme"
   >;
 }
-// TODO: do this better
-const ws = new WebSocket("http://localhost:6969");
-ws.onopen = () => {
-  ws.send("hello, world");
-};
 
 export const Editor = (props: EditorProps): JSX.Element => {
+  const [initialized, setInitialized] = useState(false);
+  const [value, setValue] = useState<string | undefined>();
+  const [ws, setWebSocket] = useState<WebSocket>();
   const [editor, setEditor] =
     useState<monaco.editor.IStandaloneCodeEditor | null>(null);
   const monacoEl = useRef(null);
   const styles = useStyles();
 
   useEffect(() => {
+    if (initialized && value !== undefined) {
+      const position = editor?.getPosition();
+      editor?.setValue(value);
+      if (position) {
+        editor?.setPosition(position);
+      }
+    }
+  }, [value]);
+
+  useEffect(() => {
+    const _ws = new WebSocket("http://localhost:6969");
+    _ws.addEventListener("message", (message) => {
+      const { type, data } = JSON.parse(message.data);
+
+      if (type !== "editorValue") {
+        return;
+      }
+
+      setValue(data);
+    });
+    setWebSocket(_ws);
+  }, []);
+
+  useEffect(() => {
+    if (value === undefined || initialized) {
+      return;
+    }
+
     if (monacoEl) {
       setEditor((editor) => {
         if (editor) return editor;
 
         return monaco.editor.create(monacoEl.current!, {
-          value: ["function x() {", '\tconsole.log("Hello world!");', "}"].join(
-            "\n"
-          ),
+          value,
           ...props.options,
           language: props.language,
           theme: props.theme,
         });
       });
+      setInitialized(true);
     }
 
     return () => editor?.dispose();
-  }, [monacoEl.current]);
+  }, [value, monacoEl.current]);
 
   useEffect(() => {
     if (!editor) {
       return;
     }
 
-    const onDidChangeModelContent = editor.onDidChangeModelContent(() => {
-      // TODO: Submit changes to server
+    const onDidChangeModelContent = editor.onDidChangeModelContent((e) => {
+      if (ws === undefined || ws.readyState !== WebSocket.OPEN) {
+        return;
+      }
+
+      ws.send(JSON.stringify({ type: "changeModelContent", data: e }));
     });
-    const onDidChangeCursorPosition = editor.onDidChangeCursorPosition(() => {
-      // TODO: Submit cursor position to server
+    const onDidChangeCursorPosition = editor.onDidChangeCursorPosition((e) => {
+      if (ws === undefined || ws.readyState !== WebSocket.OPEN) {
+        return;
+      }
+
+      ws.send(JSON.stringify({ type: "changeCursorPosition", data: e }));
     });
 
     return () => {
       onDidChangeModelContent.dispose();
       onDidChangeCursorPosition.dispose();
     };
-  }, [editor]);
+  }, [value, editor]);
 
   return (
-    <div className={styles.container}>
+    <div className={styles.container} hidden={initialized}>
       <div className={styles.editor} ref={monacoEl}></div>
     </div>
   );
