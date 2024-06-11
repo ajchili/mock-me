@@ -1,21 +1,7 @@
-import { SelfContainedImageRepository } from "./components/SelfContainedImageRepository";
+import * as pulumi from "@pulumi/pulumi";
 
-const assetImageRepository = new SelfContainedImageRepository(
-  "asset-image-repository",
-  {
-    image: {
-      name: "asset",
-    },
-  }
-);
-const serverImageRepository = new SelfContainedImageRepository(
-  "server-image-repository",
-  {
-    image: {
-      name: "server",
-    },
-  }
-);
+import { App } from "./components/App";
 
-export const assetImageName = assetImageRepository.image.imageName;
-export const serverImageName = serverImageRepository.image.imageName;
+const app = new App("mock-me");
+
+export const frontendURL = pulumi.interpolate`http://${app.assetBalancer.loadBalancer.dnsName}`;

@@ -4,28 +4,28 @@ import * as docker from "@pulumi/docker";
 
 interface SelfContainedImageRepositoryOptions
   extends pulumi.ComponentResourceOptions {
-  image: {
-    name: string;
-  } & Pick<docker.types.input.DockerBuild, "context" | "dockerfile">;
+  image?: Pick<docker.types.input.DockerBuild, "context" | "dockerfile">;
 }
 
 // TODO: Think about this name. I am not sure that I like it.
 export class SelfContainedImageRepository extends pulumi.ComponentResource {
+  public repository: aws.ecr.Repository;
   public image: docker.Image;
 
-  constructor(name: string, options: SelfContainedImageRepositoryOptions) {
+  constructor(name: string, options: SelfContainedImageRepositoryOptions = {}) {
     super("mock-me:SelfContainedImageRepository", name, {}, options);
 
-    const repository = new aws.ecr.Repository(
+    this.repository = new aws.ecr.Repository(
       `${name}-repository`,
       {
-        name: `mock-me/${options.image.name}`,
+        name: `mock-me/${name}`,
+        forceDelete: true,
       },
       { parent: this }
     );
     const authToken = aws.ecr.getAuthorizationTokenOutput(
       {
-        registryId: repository.registryId,
+        registryId: this.repository.registryId,
       },
       { parent: this }
     );
@@ -38,14 +38,15 @@ export class SelfContainedImageRepository extends pulumi.ComponentResource {
             BUILDKIT_INLINE_CACHE: "1",
           },
           cacheFrom: {
-            images: [pulumi.interpolate`${repository.repositoryUrl}:latest`],
+            images: [
+              pulumi.interpolate`${this.repository.repositoryUrl}:latest`,
+            ],
           },
-          context: options.image.context || `../${options.image.name}`,
-          dockerfile:
-            options.image.dockerfile || `../${options.image.name}/Dockerfile`,
-          platform: "linux/arm64",
+          context: options.image?.context || `../${name}`,
+          dockerfile: options.image?.dockerfile,
+          platform: "Linux/X86_64",
         },
-        imageName: pulumi.interpolate`${repository.repositoryUrl}:latest`,
+        imageName: pulumi.interpolate`${this.repository.repositoryUrl}:latest`,
         registry: {
           username: pulumi.secret(
             authToken.apply((authToken) => authToken.userName)
@@ -53,7 +54,7 @@ export class SelfContainedImageRepository extends pulumi.ComponentResource {
           password: pulumi.secret(
             authToken.apply((authToken) => authToken.password)
           ),
-          server: repository.repositoryUrl,
+          server: this.repository.repositoryUrl,
         },
       },
       { parent: this }
