@@ -3,6 +3,8 @@ import * as monaco from "monaco-editor";
 import { useStyles } from "./styles.js";
 
 export interface EditorProps {
+  value: string;
+  onChange?: (event: monaco.editor.IModelContentChangedEvent) => void;
   language?: string;
   theme?: "vs-light" | "vs-dark";
   options?: Omit<
@@ -13,39 +15,21 @@ export interface EditorProps {
 
 export const Editor = (props: EditorProps): JSX.Element => {
   const [initialized, setInitialized] = useState(false);
-  const [value, setValue] = useState<string | undefined>();
-  const [ws, setWebSocket] = useState<WebSocket>();
   const [editor, setEditor] =
     useState<monaco.editor.IStandaloneCodeEditor | null>(null);
   const monacoEl = useRef(null);
   const styles = useStyles();
 
   useEffect(() => {
-    if (initialized && value !== undefined) {
-      const position = editor?.getPosition();
-      editor?.setValue(value);
-      if (position) {
-        editor?.setPosition(position);
-      }
+    const position = editor?.getPosition();
+    editor?.setValue(props.value);
+    if (position) {
+      editor?.setPosition(position);
     }
-  }, [value]);
+  }, [props.value]);
 
   useEffect(() => {
-    const _ws = new WebSocket("http://localhost:6969");
-    _ws.addEventListener("message", (message) => {
-      const { type, data } = JSON.parse(message.data);
-
-      if (type !== "editorValue") {
-        return;
-      }
-
-      setValue(data);
-    });
-    setWebSocket(_ws);
-  }, []);
-
-  useEffect(() => {
-    if (value === undefined || initialized) {
+    if (initialized) {
       return;
     }
 
@@ -54,7 +38,7 @@ export const Editor = (props: EditorProps): JSX.Element => {
         if (editor) return editor;
 
         return monaco.editor.create(monacoEl.current!, {
-          value,
+          value: props.value,
           ...props.options,
           language: props.language,
           theme: props.theme,
@@ -64,33 +48,21 @@ export const Editor = (props: EditorProps): JSX.Element => {
     }
 
     return () => editor?.dispose();
-  }, [value, monacoEl.current]);
+  }, [monacoEl.current]);
 
   useEffect(() => {
     if (!editor) {
       return;
     }
 
-    const onDidChangeModelContent = editor.onDidChangeModelContent((e) => {
-      if (ws === undefined || ws.readyState !== WebSocket.OPEN) {
-        return;
-      }
-
-      ws.send(JSON.stringify({ type: "changeModelContent", data: e }));
-    });
-    const onDidChangeCursorPosition = editor.onDidChangeCursorPosition((e) => {
-      if (ws === undefined || ws.readyState !== WebSocket.OPEN) {
-        return;
-      }
-
-      ws.send(JSON.stringify({ type: "changeCursorPosition", data: e }));
-    });
+    const onDidChangeModelContent = editor.onDidChangeModelContent((event) =>
+      props.onChange?.(event)
+    );
 
     return () => {
       onDidChangeModelContent.dispose();
-      onDidChangeCursorPosition.dispose();
     };
-  }, [value, editor]);
+  }, [props.value, editor]);
 
   return (
     <div className={styles.container} hidden={initialized}>
