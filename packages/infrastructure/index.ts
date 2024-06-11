@@ -1,9 +1,14 @@
-import * as pulumi from "@pulumi/pulumi";
-import * as aws from "@pulumi/aws";
-import * as awsx from "@pulumi/awsx";
+import { SelfContainedImageRepository } from "./components/SelfContainedImageRepository";
 
-// Create an AWS resource (S3 Bucket)
-const bucket = new aws.s3.Bucket("my-bucket");
+const serverImageRepository = new SelfContainedImageRepository(
+  "server-image-repository",
+  {
+    image: {
+      name: "server",
+      context: "../server",
+      dockerfile: "../server/Dockerfile",
+    },
+  }
+);
 
-// Export the name of the bucket
-export const bucketName = bucket.id;
+export const imageName = serverImageRepository.image.imageName;
