@@ -91,4 +91,4 @@ fastify.get("/selectDaily", async (req, res) => {
   res.status(200).send();
 });
 
-fastify.listen({ port: 6969 });
+fastify.listen({ host: "0.0.0.0", port: 6969 });
