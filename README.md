@@ -6,12 +6,12 @@ Self-hosted interview practice web app.
 
 **You probably shouldn't!** But here are some highlights which make this maybe okay!
 
-| Feature                                                                                                                                      | Supported |
-| -------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
-| [Leet Code](https://leetcode.com/) Integration (via [alfa-leetcode-api](https://github.com/alfaarghya/alfa-leetcode-api?tab=readme-ov-file)) | ✅        |
-| [Monaco Editor](https://microsoft.github.io/monaco-editor/) integration                                                                      | ✅        |
-| Real-time Candidate code editor                                                                                                              | ✅        |
-| Real-time Interview notes editor                                                                                                             | ✅        |
+| Feature                                                                                                                                                     | Supported |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
+| [Leet Code](https://leetcode.com/) daily question integration (via [alfa-leetcode-api](https://github.com/alfaarghya/alfa-leetcode-api?tab=readme-ov-file)) | ✅        |
+| [Monaco Editor](https://microsoft.github.io/monaco-editor/) integration                                                                                     | ✅        |
+| Real-time Candidate code editor                                                                                                                             | ✅        |
+| Real-time Interview notes editor                                                                                                                            | ✅        |
 
 | Languages          | Supported           |
 | ------------------ | ------------------- |
