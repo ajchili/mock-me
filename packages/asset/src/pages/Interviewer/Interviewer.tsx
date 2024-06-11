@@ -39,12 +39,21 @@ export const Interviewer = (): JSX.Element => {
           })}
         </div>
         {activeTab === 0 && (
-          <RemoteEditor type="question" language="html" options={{ wordWrap: "on" }} />
+          <RemoteEditor
+            type="question"
+            language="html"
+            options={{ wordWrap: "on" }}
+          />
         )}
         {activeTab === 1 && (
           <>
             <h2>Interviewer Actions</h2>
-            <button onClick={() => fetch("http://localhost:6969/selectDaily")}>
+            <button
+              onClick={() => {
+                const query = new URLSearchParams(window.location.search);
+                fetch(`${query.get("endpoint")}:6969/selectDaily`);
+              }}
+            >
               Load Daily Question
             </button>
           </>

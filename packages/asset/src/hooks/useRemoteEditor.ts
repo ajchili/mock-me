@@ -76,7 +76,8 @@ export const useRemoteEditorValue = ({
   const wsRef = useRef<WebSocket>();
 
   if (!wsRef.current) {
-    wsRef.current = new WebSocket("http://localhost:6969");
+    const query = new URLSearchParams(window.location.search);
+    wsRef.current = new WebSocket(`${query.get("endpoint")}:6969`);
   }
 
   const onOpen = () => {
