@@ -2,6 +2,7 @@
   "name": "@mock-me/empty",
   "packageManager": "npm@10.2.4",
   "scripts": {
+    "build": "turbo run build",
     "start": "turbo run start"
   },
   "workspaces": [

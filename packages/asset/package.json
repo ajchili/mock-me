@@ -4,6 +4,7 @@
   "description": "Web application to make it easier to conduct mock interviews.",
   "type": "module",
   "scripts": {
+    "build": "vite build",
     "start": "vite"
   },
   "author": "Kirin Patel <contact@kirinpatel.com>",
