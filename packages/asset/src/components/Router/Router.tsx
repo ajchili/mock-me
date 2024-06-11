@@ -4,12 +4,12 @@ import {
   RouterProvider,
 } from "react-router-dom";
 import { Login } from "../../pages/Login/Login.js";
-import { Interview } from "../../pages/Interview/Interview.js";
+import { Interviewer } from "../../pages/Interviewer/Interviewer.js";
 import { Candidate } from "../../pages/Candidate/Candidate.js";
 
 const router = createHashRouter([
   { path: "/", Component: Login },
-  { path: "/interview", Component: Interview },
+  { path: "/interviewer", Component: Interviewer },
   { path: "/candidate", Component: Candidate },
 ]);
 

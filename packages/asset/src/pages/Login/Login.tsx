@@ -9,8 +9,8 @@ export const Login = (): JSX.Element => {
     navigate("/candidate");
   };
 
-  const navigateToInterview = () => {
-    navigate("/interview");
+  const navigateToInterviewer = () => {
+    navigate("/interviewer");
   };
 
   return (
@@ -19,7 +19,9 @@ export const Login = (): JSX.Element => {
         <div className={styles.welcomeCard}>
           Welcome
           <button onClick={navigateToCandidate}>I am the Candidate 🧑‍🎓</button>
-          <button onClick={navigateToInterview}>I am the Interviewer 🧑‍🏫</button>
+          <button onClick={navigateToInterviewer}>
+            I am the Interviewer 🧑‍🏫
+          </button>
         </div>
       </div>
     </div>

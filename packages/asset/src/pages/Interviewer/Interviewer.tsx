@@ -1,6 +1,6 @@
 import { Editor } from "../../components/Editor/Editor.js";
 
-export const Interview = (): JSX.Element => {
+export const Interviewer = (): JSX.Element => {
   return (
     <div style={{ display: "flex", width: "100%", height: "100vh" }}>
       <Editor
