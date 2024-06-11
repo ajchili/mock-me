@@ -38,10 +38,15 @@ export const Editor = (props: EditorProps): JSX.Element => {
         if (editor) return editor;
 
         return monaco.editor.create(monacoEl.current!, {
+          automaticLayout: true,
           value: props.value,
+          // Default options
+          fontSize: 14,
+          tabSize: 2,
+          // Overwritten options
           ...props.options,
           language: props.language,
-          theme: props.theme,
+          theme: props.theme || "vs-dark",
         });
       });
       setInitialized(true);
