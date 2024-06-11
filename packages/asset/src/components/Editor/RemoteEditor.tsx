@@ -9,7 +9,7 @@ const WEB_SOCKET_READY_STATE_TEXT: Record<number, string> = {
 };
 
 interface RemoteEditorProps extends Omit<EditorProps, "value" | "onChange"> {
-  type: "candidate" | "interviewer";
+  type: "candidate" | "interviewer" | "question";
 }
 
 export const RemoteEditor = (props: RemoteEditorProps): JSX.Element => {

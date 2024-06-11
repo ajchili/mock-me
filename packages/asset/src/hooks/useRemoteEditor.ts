@@ -33,7 +33,7 @@ interface ClearChangesAction {
 }
 
 export interface RemoteEditorValueProps {
-  type: "candidate" | "interviewer";
+  type: "candidate" | "interviewer" | "question";
 }
 
 function reducer(state: State, action: Action): State {
@@ -102,15 +102,15 @@ export const useRemoteEditorValue = ({
   };
 
   const onMessage = (messageEvent: MessageEvent<any>) => {
-    const { type: messageType, editor, data } = JSON.parse(messageEvent.data);
+    const { type: messageType, data } = JSON.parse(messageEvent.data);
 
     if (messageType !== "editorValue") {
       return;
-    } else if (editor !== type) {
+    } else if (data.type !== type) {
       return;
     }
 
-    dispatch({ type: "setValue", value: data });
+    dispatch({ type: "setValue", value: data.value });
   };
 
   // Side effect

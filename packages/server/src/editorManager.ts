@@ -1,6 +1,12 @@
 import { EventEmitter } from "node:events";
 
 export interface EditorManagerProps {
+  initialValue?: string;
+  /**
+   * Rate at which changes for an editor are processed in milliseconds.
+   *
+   * @default 100
+   */
   pollingRate?: number;
 }
 
@@ -11,16 +17,20 @@ function validatePollingRate(pollingRate: number) {
 }
 
 export class EditorManager extends EventEmitter {
-  private _value: string = [
-    "function helloWorld() {",
-    '\tconsole.log("Hello, world!");',
-    "};",
-  ].join("\n");
+  private _value: string;
   // TODO: Get types figured out
   private changeQueue: any[] = [];
 
-  constructor({ pollingRate = 100 }: EditorManagerProps = {}) {
+  constructor({
+    initialValue = [
+      "function helloWorld() {",
+      '\tconsole.log("Hello, world!");',
+      "};",
+    ].join("\n"),
+    pollingRate = 100,
+  }: EditorManagerProps = {}) {
     super();
+    this._value = initialValue;
     validatePollingRate(pollingRate);
 
     setInterval(this.processChanges.bind(this), pollingRate);
@@ -28,6 +38,11 @@ export class EditorManager extends EventEmitter {
 
   get value(): string {
     return this._value;
+  }
+
+  set value(value: string) {
+    this._value = value;
+    this.emit("onChange");
   }
 
   enqueueChanges(changes: any[]) {
