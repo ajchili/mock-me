@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useLayoutEffect } from "react";
 import * as monaco from "monaco-editor";
 import { useStyles } from "./styles.js";
 
@@ -17,8 +17,23 @@ export const Editor = (props: EditorProps): JSX.Element => {
   const [initialized, setInitialized] = useState(false);
   const [editor, setEditor] =
     useState<monaco.editor.IStandaloneCodeEditor | null>(null);
-  const monacoEl = useRef(null);
+  const monacoEl = useRef<HTMLDivElement>(null);
   const styles = useStyles();
+
+  const resize = () => {
+    editor?.layout();
+  };
+
+  useEffect(() => {
+    // https://github.com/Microsoft/monaco-editor/issues/28#issuecomment-228523529
+    window.addEventListener("resize", resize);
+    monacoEl.current?.addEventListener("resize", resize);
+
+    return () => {
+      monacoEl.current?.removeEventListener("resize", resize);
+      window.removeEventListener("resize", resize);
+    };
+  }, [monacoEl]);
 
   useEffect(() => {
     const position = editor?.getPosition();
@@ -38,7 +53,6 @@ export const Editor = (props: EditorProps): JSX.Element => {
         if (editor) return editor;
 
         return monaco.editor.create(monacoEl.current!, {
-          automaticLayout: true,
           value: props.value,
           // Default options
           fontSize: 14,
