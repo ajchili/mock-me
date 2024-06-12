@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect, useLayoutEffect } from "react";
+import { useRef, useState, useEffect } from "react";
 import * as monaco from "monaco-editor";
 import { useStyles } from "./styles.js";
 
@@ -19,6 +19,10 @@ export const Editor = (props: EditorProps): JSX.Element => {
     useState<monaco.editor.IStandaloneCodeEditor | null>(null);
   const monacoEl = useRef<HTMLDivElement>(null);
   const styles = useStyles();
+
+  editor?.updateOptions({
+    ...props.options,
+  });
 
   const resize = () => {
     editor?.layout();
@@ -61,6 +65,7 @@ export const Editor = (props: EditorProps): JSX.Element => {
           ...props.options,
           language: props.language,
           theme: props.theme || "vs-dark",
+          readOnly: true,
         });
       });
       setInitialized(true);
@@ -84,8 +89,8 @@ export const Editor = (props: EditorProps): JSX.Element => {
   }, [props.value, editor]);
 
   return (
-    <div className={styles.container} hidden={initialized}>
-      <div className={styles.editor} ref={monacoEl}></div>
+    <div className={styles.container}>
+      <div className={styles.editor} ref={monacoEl} />
     </div>
   );
 };

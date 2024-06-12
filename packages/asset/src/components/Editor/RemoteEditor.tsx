@@ -1,13 +1,6 @@
 import { Editor, EditorProps } from "../../components/Editor/Editor.js";
 import { useRemoteEditorValue } from "../../hooks/useRemoteEditor.js";
 
-const WEB_SOCKET_READY_STATE_TEXT: Record<number, string> = {
-  [WebSocket.CONNECTING]: "Connecting...",
-  [WebSocket.OPEN]: "Connected",
-  [WebSocket.CLOSING]: "Disconnecting...",
-  [WebSocket.CLOSED]: "Disconnected",
-};
-
 interface RemoteEditorProps extends Omit<EditorProps, "value" | "onChange"> {
   type: "candidate" | "interviewer" | "question";
 }
@@ -16,14 +9,11 @@ export const RemoteEditor = (props: RemoteEditorProps): JSX.Element => {
   const [{ value, readyState }, dispatch] = useRemoteEditorValue({
     type: props.type,
   });
-
-  if (value === undefined || readyState !== WebSocket.OPEN) {
-    return <h1>{WEB_SOCKET_READY_STATE_TEXT[readyState]}</h1>;
-  }
+  const isReady = value !== undefined && readyState === WebSocket.OPEN;
 
   return (
     <Editor
-      value={value}
+      value={value || "Loading..."}
       onChange={(event) => {
         if (readyState !== WebSocket.OPEN) {
           return;
@@ -33,7 +23,10 @@ export const RemoteEditor = (props: RemoteEditorProps): JSX.Element => {
       }}
       language={props.language}
       theme={props.theme}
-      options={props.options}
+      options={{
+        ...props.options,
+        readOnly: !isReady,
+      }}
     />
   );
 };
