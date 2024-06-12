@@ -6,7 +6,8 @@ import { SelfContainedImageRepository } from "./SelfContainedImageRepository";
 
 export class App extends pulumi.ComponentResource {
   public service: awsx.ecs.FargateService;
-  public assetBalancer: awsx.lb.ApplicationLoadBalancer;
+  public assetLoadbalancer: awsx.lb.ApplicationLoadBalancer;
+  public serverLoadbalancer: awsx.lb.ApplicationLoadBalancer;
 
   constructor(name: string) {
     super("mock-me:App", name, {}, {});
@@ -25,14 +26,14 @@ export class App extends pulumi.ComponentResource {
       { parent: this }
     );
 
-    this.assetBalancer = new awsx.lb.ApplicationLoadBalancer(
+    this.assetLoadbalancer = new awsx.lb.ApplicationLoadBalancer(
       "asset-loadbalancer",
       {},
       { parent: this }
     );
-    const serverLoadbalancer = new awsx.lb.ApplicationLoadBalancer(
+    this.serverLoadbalancer = new awsx.lb.ApplicationLoadBalancer(
       "server-loadbalancer",
-      { defaultTargetGroupPort: 6969 },
+      { defaultTargetGroupPort: 6969, idleTimeout: 4000 },
       { parent: this }
     );
 
@@ -53,14 +54,14 @@ export class App extends pulumi.ComponentResource {
               environment: [
                 {
                   name: "endpoint",
-                  value: pulumi.interpolate`http://${serverLoadbalancer.loadBalancer.dnsName}`,
+                  value: pulumi.interpolate`http://${this.serverLoadbalancer.loadBalancer.dnsName}`,
                 },
               ],
               portMappings: [
                 {
                   containerPort: 80,
                   hostPort: 80,
-                  targetGroup: this.assetBalancer.defaultTargetGroup,
+                  targetGroup: this.assetLoadbalancer.defaultTargetGroup,
                 },
               ],
             },
@@ -74,7 +75,7 @@ export class App extends pulumi.ComponentResource {
                 {
                   containerPort: 6969,
                   hostPort: 6969,
-                  targetGroup: serverLoadbalancer.defaultTargetGroup,
+                  targetGroup: this.serverLoadbalancer.defaultTargetGroup,
                 },
               ],
             },
