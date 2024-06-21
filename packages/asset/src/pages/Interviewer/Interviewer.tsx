@@ -30,6 +30,7 @@ export const Interviewer = (): JSX.Element => {
           {TABS.map((tab, tabIndex) => {
             return (
               <button
+              key={`${tab}-tab`}
                 className={styles.tab}
                 onClick={() => setActiveTab(tabIndex)}
               >
