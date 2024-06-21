@@ -1,8 +1,11 @@
 import { Editor, EditorProps } from "../../components/Editor/Editor.js";
-import { useRemoteEditorValue } from "../../hooks/useRemoteEditor.js";
+import {
+  useRemoteEditorValue,
+  type RemoteEditorType,
+} from "../../hooks/useRemoteEditor.js";
 
 interface RemoteEditorProps extends Omit<EditorProps, "value" | "onChange"> {
-  type: "candidate" | "interviewer" | "question";
+  type: RemoteEditorType;
 }
 
 export const RemoteEditor = (props: RemoteEditorProps): JSX.Element => {

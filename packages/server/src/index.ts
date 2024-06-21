@@ -25,10 +25,7 @@ fastify.register(() =>
       reply.send({ hello: "world" });
     },
     wsHandler: (socket) => {
-      let type: keyof typeof editorManagers;
-
-      const register = (_type: keyof typeof editorManagers) => {
-        type = _type;
+      const register = (type: keyof typeof editorManagers) => {
         socket.send(
           JSON.stringify({
             type: "editorValue",
@@ -56,15 +53,18 @@ fastify.register(() =>
         const decodedMessage = Buffer.from(message).toString("utf-8");
         const { type: messageType, data } = JSON.parse(decodedMessage);
         switch (messageType) {
-          case "register":
-            type = data.type;
+          case "getEditorValue":
             register(data.type);
             break;
           case "changeCursorPosition":
             console.log(data.position.lineNumber + ":" + data.position.column);
             break;
           case "changeModelContent":
-            editorManagers[type].enqueueChanges(data.changes);
+            const { type } = data;
+            if (type in editorManagers) {
+              // @ts-expect-error
+              editorManagers[type].enqueueChanges(data.modelContent.changes);
+            }
             break;
           default:
             console.log(type, JSON.stringify(data));

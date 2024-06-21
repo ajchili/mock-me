@@ -1,19 +1,16 @@
 import { useEffect, useRef, useState } from "react";
+import { useWebSocket } from "../../hooks/useWebSocket.js";
 
 export const QuestionArea = (): JSX.Element => {
   const [value, setValue] = useState(`Loading prompt!`);
   const questionPromptEl = useRef<HTMLDivElement>(null);
-  const wsRef = useRef<WebSocket>();
-
-  if (!wsRef.current) {
-    const query = new URLSearchParams(window.location.search);
-    wsRef.current = new WebSocket(`${query.get("endpoint")}:6969`);
-  }
+  const query = new URLSearchParams(window.location.search);
+  const webSocket = useWebSocket(`${query.get("endpoint")}:6969`);
 
   const onOpen = () => {
-    wsRef.current?.send(
+    webSocket?.send(
       JSON.stringify({
-        type: "register",
+        type: "getEditorValue",
         data: {
           type: "question",
         },
@@ -33,15 +30,14 @@ export const QuestionArea = (): JSX.Element => {
   };
 
   useEffect(() => {
-    wsRef.current?.addEventListener("open", onOpen);
-    wsRef.current?.addEventListener("message", onMessage);
+    webSocket.addEventListener("open", onOpen);
+    webSocket.addEventListener("message", onMessage);
 
     return () => {
-      wsRef.current?.removeEventListener("open", onOpen);
-      wsRef.current?.removeEventListener("message", onMessage);
-      wsRef.current?.close();
+      webSocket.removeEventListener("open", onOpen);
+      webSocket.removeEventListener("message", onMessage);
     };
-  }, [wsRef.current]);
+  }, [webSocket]);
 
   useEffect(() => {
     if (!questionPromptEl.current) {

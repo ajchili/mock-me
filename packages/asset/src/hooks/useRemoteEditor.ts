@@ -1,5 +1,10 @@
-import { useEffect, useReducer, useRef } from "react";
+import { useEffect, useReducer } from "react";
 import type * as monaco from "monaco-editor";
+import { useWebSocket } from "./useWebSocket.js";
+
+export type RemoteEditorType = "candidate" | "interviewer" | "question";
+
+const valueCache: Partial<Record<RemoteEditorType, string>> = {};
 
 interface State {
   value?: string;
@@ -14,7 +19,7 @@ type Action =
   | ClearChangesAction;
 
 interface SetValueAction {
-  type: "setValue";
+  type: "setEditorValue";
   value: string;
 }
 
@@ -33,12 +38,12 @@ interface ClearChangesAction {
 }
 
 export interface RemoteEditorValueProps {
-  type: "candidate" | "interviewer" | "question";
+  type: RemoteEditorType;
 }
 
 function reducer(state: State, action: Action): State {
   switch (action.type) {
-    case "setValue":
+    case "setEditorValue":
       state = {
         ...state,
         value: action.value,
@@ -69,25 +74,22 @@ function reducer(state: State, action: Action): State {
 export const useRemoteEditorValue = ({
   type,
 }: RemoteEditorValueProps): [State, React.Dispatch<Action>] => {
+  const query = new URLSearchParams(window.location.search);
+  const webSocket = useWebSocket(`${query.get("endpoint")}:6969`);
   const [state, dispatch] = useReducer(reducer, {
-    readyState: WebSocket.CONNECTING,
+    readyState: webSocket?.readyState || WebSocket.CONNECTING,
+    value: valueCache[type],
     changes: [],
   });
-  const wsRef = useRef<WebSocket>();
-
-  if (!wsRef.current) {
-    const query = new URLSearchParams(window.location.search);
-    wsRef.current = new WebSocket(`${query.get("endpoint")}:6969`);
-  }
 
   const onOpen = () => {
     dispatch({
       type: "setReadyState",
-      readyState: wsRef.current?.readyState || WebSocket.CONNECTING,
+      readyState: webSocket?.readyState || WebSocket.CONNECTING,
     });
-    wsRef.current?.send(
+    webSocket.send(
       JSON.stringify({
-        type: "register",
+        type: "getEditorValue",
         data: {
           type,
         },
@@ -98,7 +100,7 @@ export const useRemoteEditorValue = ({
   const onClose = () => {
     dispatch({
       type: "setReadyState",
-      readyState: wsRef.current?.readyState || WebSocket.CONNECTING,
+      readyState: webSocket?.readyState || WebSocket.CONNECTING,
     });
   };
 
@@ -111,7 +113,8 @@ export const useRemoteEditorValue = ({
       return;
     }
 
-    dispatch({ type: "setValue", value: data.value });
+    dispatch({ type: "setEditorValue", value: data.value });
+    valueCache[type] = data.value;
   };
 
   // Side effect
@@ -137,26 +140,28 @@ export const useRemoteEditorValue = ({
         }
       );
     dispatch({ type: "clearChanges" });
-    wsRef.current?.send(
+    webSocket.send(
       JSON.stringify({
         type: "changeModelContent",
-        data: changes,
+        data: {
+          type,
+          modelContent: changes,
+        },
       })
     );
   }, [state.changes]);
 
   useEffect(() => {
-    wsRef.current?.addEventListener("open", onOpen);
-    wsRef.current?.addEventListener("close", onClose);
-    wsRef.current?.addEventListener("message", onMessage);
+    webSocket?.addEventListener("open", onOpen);
+    webSocket?.addEventListener("close", onClose);
+    webSocket?.addEventListener("message", onMessage);
 
     return () => {
-      wsRef.current?.removeEventListener("open", onOpen);
-      wsRef.current?.removeEventListener("close", onClose);
-      wsRef.current?.removeEventListener("message", onMessage);
-      wsRef.current?.close();
+      webSocket.removeEventListener("open", onOpen);
+      webSocket.removeEventListener("close", onClose);
+      webSocket.removeEventListener("message", onMessage);
     };
-  }, [wsRef.current]);
+  }, [webSocket]);
 
   return [state, dispatch];
 };
