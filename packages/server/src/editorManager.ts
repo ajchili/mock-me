@@ -1,4 +1,5 @@
 import { EventEmitter } from "node:events";
+import type { ChangeEditorValueMessage } from "@mock-me/messages";
 
 export interface EditorManagerProps {
   initialValue?: string;
@@ -45,7 +46,7 @@ export class EditorManager extends EventEmitter {
     this.emit("onChange");
   }
 
-  enqueueChanges(changes: any[]) {
+  enqueueChanges(changes: ChangeEditorValueMessage["data"]["changes"]) {
     this.changeQueue.push(...changes);
   }
 
@@ -64,7 +65,7 @@ export class EditorManager extends EventEmitter {
     }
   }
 
-  processChange(change: any) {
+  processChange(change: ChangeEditorValueMessage["data"]["changes"][number]) {
     const { text: newText, rangeOffset, rangeLength } = change;
 
     const before = this._value.substring(0, rangeOffset);

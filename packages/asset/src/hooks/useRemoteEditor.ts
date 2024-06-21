@@ -1,167 +1,60 @@
-import { useEffect, useReducer } from "react";
+import { useEffect, useState } from "react";
 import type * as monaco from "monaco-editor";
-import { useWebSocket } from "./useWebSocket.js";
+import type { EditorType, Message } from "@mock-me/messages";
+import { useSocket } from "./useSocket.js";
 
-export type RemoteEditorType = "candidate" | "interviewer" | "question";
-
-const valueCache: Partial<Record<RemoteEditorType, string>> = {};
-
-interface State {
-  value?: string;
-  readyState: number;
-  changes: monaco.editor.IModelContentChangedEvent[];
+export interface useRemoteEditorProps {
+  editorType: EditorType;
 }
 
-type Action =
-  | SetValueAction
-  | SetReadyStateAction
-  | SendChangeAction
-  | ClearChangesAction;
-
-interface SetValueAction {
-  type: "setEditorValue";
-  value: string;
-}
-
-interface SetReadyStateAction {
-  type: "setReadyState";
-  readyState: number;
-}
-
-interface SendChangeAction {
-  type: "sendChange";
-  change: monaco.editor.IModelContentChangedEvent;
-}
-
-interface ClearChangesAction {
-  type: "clearChanges";
-}
-
-export interface RemoteEditorValueProps {
-  type: RemoteEditorType;
-}
-
-function reducer(state: State, action: Action): State {
-  switch (action.type) {
-    case "setEditorValue":
-      state = {
-        ...state,
-        value: action.value,
-      };
-      break;
-    case "setReadyState":
-      state = {
-        ...state,
-        readyState: action.readyState,
-      };
-      break;
-    case "sendChange":
-      state = {
-        ...state,
-        changes: [action.change].concat(state.changes),
-      };
-      break;
-    case "clearChanges":
-      state = {
-        ...state,
-        changes: [],
-      };
-      break;
-  }
-  return state;
-}
-
-export const useRemoteEditorValue = ({
-  type,
-}: RemoteEditorValueProps): [State, React.Dispatch<Action>] => {
-  const query = new URLSearchParams(window.location.search);
-  const webSocket = useWebSocket(`${query.get("endpoint")}:6969`);
-  const [state, dispatch] = useReducer(reducer, {
-    readyState: webSocket?.readyState || WebSocket.CONNECTING,
-    value: valueCache[type],
-    changes: [],
-  });
+export const useRemoteEditor = ({ editorType }: useRemoteEditorProps) => {
+  const { sendMessage, socket, connected } = useSocket();
+  const [value, setValue] = useState<string>();
 
   const onOpen = () => {
-    dispatch({
-      type: "setReadyState",
-      readyState: webSocket?.readyState || WebSocket.CONNECTING,
-    });
-    webSocket.send(
-      JSON.stringify({
-        type: "getEditorValue",
-        data: {
-          type,
-        },
-      })
-    );
-  };
-
-  const onClose = () => {
-    dispatch({
-      type: "setReadyState",
-      readyState: webSocket?.readyState || WebSocket.CONNECTING,
+    sendMessage({
+      type: "GET_EDITOR_VALUE",
+      data: { editorType },
     });
   };
 
   const onMessage = (messageEvent: MessageEvent<any>) => {
-    const { type: messageType, data } = JSON.parse(messageEvent.data);
+    try {
+      const maybeValidMessage = JSON.parse(messageEvent.data);
 
-    if (messageType !== "editorValue") {
-      return;
-    } else if (data.type !== type) {
-      return;
+      if (!("type" in maybeValidMessage)) {
+        return;
+      }
+
+      const slightlyMoreValidMessage = maybeValidMessage as Message;
+      if (slightlyMoreValidMessage.type !== "EDITOR_VALUE") {
+        return;
+      } else if (slightlyMoreValidMessage.data.editorType !== editorType) {
+        return;
+      }
+
+      setValue(slightlyMoreValidMessage.data.value);
+    } catch (e) {
+      // TODO: Handle error
+      console.error(e);
     }
-
-    dispatch({ type: "setEditorValue", value: data.value });
-    valueCache[type] = data.value;
   };
 
-  // Side effect
-  useEffect(() => {
-    if (state.changes.length === 0) {
-      return;
-    }
-
-    const changes =
-      state.changes.reduce<monaco.editor.IModelContentChangedEvent>(
-        (acc, curr) => ({
-          ...acc,
-          changes: acc.changes.concat(curr.changes),
-        }),
-        {
-          changes: [],
-          eol: "",
-          isEolChange: false,
-          isFlush: false,
-          isRedoing: false,
-          isUndoing: false,
-          versionId: 0,
-        }
-      );
-    dispatch({ type: "clearChanges" });
-    webSocket.send(
-      JSON.stringify({
-        type: "changeModelContent",
-        data: {
-          type,
-          modelContent: changes,
-        },
-      })
-    );
-  }, [state.changes]);
+  const sendChanges = (
+    changes: monaco.editor.IModelContentChangedEvent["changes"]
+  ) => {
+    sendMessage({ type: "CHANGE_EDITOR_VALUE", data: { editorType, changes } });
+  };
 
   useEffect(() => {
-    webSocket?.addEventListener("open", onOpen);
-    webSocket?.addEventListener("close", onClose);
-    webSocket?.addEventListener("message", onMessage);
+    socket.addEventListener("open", onOpen);
+    socket.addEventListener("message", onMessage);
 
     return () => {
-      webSocket.removeEventListener("open", onOpen);
-      webSocket.removeEventListener("close", onClose);
-      webSocket.removeEventListener("message", onMessage);
+      socket.removeEventListener("open", onOpen);
+      socket.removeEventListener("message", onMessage);
     };
-  }, [webSocket]);
+  }, []);
 
-  return [state, dispatch];
+  return { value, connected, sendChanges };
 };

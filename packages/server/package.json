@@ -13,6 +13,7 @@
     "fastify": "^4.27.0"
   },
   "devDependencies": {
+    "@mock-me/messages": "*",
     "tsx": "^4.15.1"
   }
 }
