@@ -8,8 +8,8 @@ export const Candidate = (): JSX.Element => {
   const wsRef = useRef<WebSocket>();
 
   if (!wsRef.current) {
-    const query = new URLSearchParams(window.location.search);
-    wsRef.current = new WebSocket(`${query.get("endpoint")}:6969`);
+    const { hostname } = window.location;
+    wsRef.current = new WebSocket(`ws://${hostname}:6969`);
   }
 
   const onOpen = () => {
