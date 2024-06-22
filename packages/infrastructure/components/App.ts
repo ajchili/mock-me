@@ -2,12 +2,12 @@ import * as pulumi from "@pulumi/pulumi";
 import * as aws from "@pulumi/aws";
 import * as awsx from "@pulumi/awsx";
 
+import { MultiTargetApplicationLoadBalancer } from "./MultiTargetApplicationLoadBalancer";
 import { SelfContainedImageRepository } from "./SelfContainedImageRepository";
 
 export class App extends pulumi.ComponentResource {
   public service: awsx.ecs.FargateService;
-  public assetLoadbalancer: awsx.lb.ApplicationLoadBalancer;
-  public serverLoadbalancer: awsx.lb.ApplicationLoadBalancer;
+  public loadbalancer: aws.lb.LoadBalancer;
 
   constructor(name: string) {
     super("mock-me:App", name, {}, {});
@@ -26,16 +26,12 @@ export class App extends pulumi.ComponentResource {
       { parent: this }
     );
 
-    this.assetLoadbalancer = new awsx.lb.ApplicationLoadBalancer(
-      "asset-loadbalancer",
-      {},
-      { parent: this }
-    );
-    this.serverLoadbalancer = new awsx.lb.ApplicationLoadBalancer(
-      "server-loadbalancer",
-      { defaultTargetGroupPort: 6969, idleTimeout: 4000 },
-      { parent: this }
-    );
+    const multiTargetLoadbalancer = new MultiTargetApplicationLoadBalancer("app-loadbalancer", {
+      ports: [80, 6969],
+      parent: this,
+    });
+
+    this.loadbalancer = multiTargetLoadbalancer.loadbalancer;
 
     this.service = new awsx.ecs.FargateService(
       "service",
@@ -51,17 +47,11 @@ export class App extends pulumi.ComponentResource {
               cpu: 1,
               memory: 512,
               essential: true,
-              environment: [
-                {
-                  name: "endpoint",
-                  value: pulumi.interpolate`http://${this.serverLoadbalancer.loadBalancer.dnsName}`,
-                },
-              ],
               portMappings: [
                 {
                   containerPort: 80,
                   hostPort: 80,
-                  targetGroup: this.assetLoadbalancer.defaultTargetGroup,
+                  targetGroup: multiTargetLoadbalancer.targetGroups[80],
                 },
               ],
             },
@@ -75,7 +65,7 @@ export class App extends pulumi.ComponentResource {
                 {
                   containerPort: 6969,
                   hostPort: 6969,
-                  targetGroup: this.serverLoadbalancer.defaultTargetGroup,
+                  targetGroup: multiTargetLoadbalancer.targetGroups[6969],
                 },
               ],
             },
