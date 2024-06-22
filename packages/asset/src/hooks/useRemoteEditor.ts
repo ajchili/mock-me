@@ -11,13 +11,6 @@ export const useRemoteEditor = ({ editorType }: useRemoteEditorProps) => {
   const { sendMessage, socket, connected } = useSocket();
   const [value, setValue] = useState<string>();
 
-  const onOpen = () => {
-    sendMessage({
-      type: "GET_EDITOR_VALUE",
-      data: { editorType },
-    });
-  };
-
   const onMessage = (messageEvent: MessageEvent<any>) => {
     try {
       const maybeValidMessage = JSON.parse(messageEvent.data);
@@ -47,11 +40,13 @@ export const useRemoteEditor = ({ editorType }: useRemoteEditorProps) => {
   };
 
   useEffect(() => {
-    socket.addEventListener("open", onOpen);
+    sendMessage({
+      type: "GET_EDITOR_VALUE",
+      data: { editorType },
+    });
     socket.addEventListener("message", onMessage);
 
     return () => {
-      socket.removeEventListener("open", onOpen);
       socket.removeEventListener("message", onMessage);
     };
   }, []);
