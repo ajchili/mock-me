@@ -47,7 +47,7 @@ export class App extends pulumi.ComponentResource {
           containers: {
             asset: {
               name: "asset",
-              image: assetImageRepository.image.repoDigest,
+              image: assetImageRepository.image.ref,
               cpu: 1,
               memory: 512,
               essential: true,
@@ -67,7 +67,7 @@ export class App extends pulumi.ComponentResource {
             },
             server: {
               name: "server",
-              image: serverImageRepository.image.repoDigest,
+              image: serverImageRepository.image.ref,
               cpu: 1,
               memory: 512,
               essential: true,
