@@ -41,7 +41,7 @@ export const Candidate = (): JSX.Element => {
         }}
       >
         <QuestionArea />
-        <div style={{ flex: 1 }}>
+        <div style={{ flex: 1, flexShrink: 1 }}>
           <RemoteEditor editorType="response" language="typescript" />
         </div>
       </div>
