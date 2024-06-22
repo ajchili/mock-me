@@ -78,8 +78,8 @@ export const Interviewer = (): JSX.Element => {
               <h2>Interviewer Actions</h2>
               <button
                 onClick={() => {
-                  const query = new URLSearchParams(window.location.search);
-                  fetch(`${query.get("endpoint")}:6969/selectDaily`);
+                  const { hostname } = window.location;
+                  fetch(`http://${hostname}:6969/selectDaily`);
                 }}
               >
                 Load Daily Question
