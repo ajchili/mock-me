@@ -7,7 +7,8 @@ export type Message =
   | RegisterMessage
   | EditorValueMessage
   | GetEditorValueMessage
-  | ChangeEditorValueMessage;
+  | ChangeEditorValueMessage
+  | ModelContentChangedMessage;
 
 export interface RegisterMessage {
   type: "REGISTER";
@@ -28,6 +29,14 @@ export interface EditorValueMessage {
   data: {
     editorType: EditorType;
     value: string;
+  };
+}
+
+export interface ModelContentChangedMessage {
+  type: "MODEL_CONTENT_CHANGED";
+  data: {
+    editorType: EditorType;
+    changes: monaco.editor.IModelContentChangedEvent["changes"];
   };
 }
 
