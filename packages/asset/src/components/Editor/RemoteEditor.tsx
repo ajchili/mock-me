@@ -7,13 +7,14 @@ interface RemoteEditorProps extends Omit<EditorProps, "value" | "onChange"> {
 }
 
 export const RemoteEditor = (props: RemoteEditorProps): JSX.Element => {
-  const { value, connected, sendChanges } = useRemoteEditor({
+  const { value, connected, sendChanges, changes } = useRemoteEditor({
     editorType: props.editorType,
   });
 
   return (
     <Editor
-      value={value || "Loading..."}
+      value={value ?? "Loading..."}
+      changes={changes}
       onChange={(event) => {
         if (!connected) {
           return;

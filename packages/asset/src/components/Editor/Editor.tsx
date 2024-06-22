@@ -28,6 +28,7 @@ window.MonacoEnvironment = {
 
 export interface EditorProps {
   value: string;
+  changes?: monaco.editor.IModelContentChangedEvent["changes"];
   onChange?: (event: monaco.editor.IModelContentChangedEvent) => void;
   language?: string;
   theme?: "vs-light" | "vs-dark";
@@ -64,6 +65,14 @@ export const Editor = (props: EditorProps): JSX.Element => {
   }, [monacoEl]);
 
   useEffect(() => {
+    editor?.executeEdits("remote", props.changes || []);
+  }, [props.changes]);
+
+  useEffect(() => {
+    if (editor?.getValue() === props.value) {
+      return;
+    }
+
     const position = editor?.getPosition();
     editor?.setValue(props.value);
     if (position) {
@@ -110,7 +119,7 @@ export const Editor = (props: EditorProps): JSX.Element => {
     return () => {
       onDidChangeModelContent.dispose();
     };
-  }, [props.value, editor]);
+  }, [props.value, props.changes, editor]);
 
   return (
     <div className={styles.container}>

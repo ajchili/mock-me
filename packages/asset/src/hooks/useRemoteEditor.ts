@@ -10,6 +10,7 @@ export interface useRemoteEditorProps {
 export const useRemoteEditor = ({ editorType }: useRemoteEditorProps) => {
   const { sendMessage, socket, connected } = useSocket();
   const [value, setValue] = useState<string>();
+  const [changes, setChanges] = useState<any[]>([]);
 
   const onMessage = (messageEvent: MessageEvent<any>) => {
     try {
@@ -20,6 +21,14 @@ export const useRemoteEditor = ({ editorType }: useRemoteEditorProps) => {
       }
 
       const slightlyMoreValidMessage = maybeValidMessage as Message;
+      if (
+        slightlyMoreValidMessage.type === "MODEL_CONTENT_CHANGED" &&
+        slightlyMoreValidMessage.data.editorType === editorType
+      ) {
+        setChanges(slightlyMoreValidMessage.data.changes);
+        return;
+      }
+
       if (slightlyMoreValidMessage.type !== "EDITOR_VALUE") {
         return;
       } else if (slightlyMoreValidMessage.data.editorType !== editorType) {
@@ -44,12 +53,12 @@ export const useRemoteEditor = ({ editorType }: useRemoteEditorProps) => {
       type: "GET_EDITOR_VALUE",
       data: { editorType },
     });
-    socket.addEventListener("message", onMessage);
+    socket.addEventListener("message", onMessage.bind(useRemoteEditor));
 
     return () => {
       socket.removeEventListener("message", onMessage);
     };
   }, []);
 
-  return { value, connected, sendChanges };
+  return { value, connected, sendChanges, changes };
 };

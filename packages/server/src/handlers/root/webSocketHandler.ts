@@ -13,6 +13,15 @@ import { EditorManager } from "../../editorManager.js";
 export const editorManagers: Record<EditorType, EditorManager> = {
   response: new EditorManager(),
   prompt: new EditorManager({
+    initialValue: [
+      "<h1>mock-me 👉🏽👈🏽</h1>",
+      "<p>",
+      "Self-hosted interview practice web app.",
+      "<br>",
+      "<br>",
+      '<a href="https://github.com/ajchili/mock-me" target="_blank">Github</a>',
+      "</p>",
+    ].join("\n"),
     pollingRate: 10000,
   }),
   notes: new EditorManager({
@@ -21,7 +30,8 @@ export const editorManagers: Record<EditorType, EditorManager> = {
   }),
 };
 
-export const handler: WebsocketHandler = (socket) => {
+export const handler: WebsocketHandler = (socket, request) => {
+  const { id } = request;
   let participant: Participant;
 
   const register = (message: RegisterMessage) => {
@@ -31,6 +41,18 @@ export const handler: WebsocketHandler = (socket) => {
       if (participant === "candidate" && editorType === "notes") {
         return;
       }
+
+      editorManagers[editorType].on("onModelContentChange", (changes) => {
+        socket.send(
+          JSON.stringify({
+            type: "MODEL_CONTENT_CHANGED",
+            data: {
+              editorType,
+              changes: changes.filter((change) => change.sender !== id),
+            },
+          })
+        );
+      });
 
       editorManagers[editorType].on("onChange", () => {
         socket.send(
@@ -68,7 +90,7 @@ export const handler: WebsocketHandler = (socket) => {
     }
 
     editorManagers[message.data.editorType].enqueueChanges(
-      message.data.changes
+      message.data.changes.map((change) => ({ ...change, sender: id }))
     );
   };
 

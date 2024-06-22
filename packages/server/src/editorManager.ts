@@ -47,6 +47,7 @@ export class EditorManager extends EventEmitter {
   }
 
   enqueueChanges(changes: ChangeEditorValueMessage["data"]["changes"]) {
+    this.emit("onModelContentChange", changes);
     this.changeQueue.push(...changes);
   }
 
