@@ -12,6 +12,7 @@ Self-hosted interview practice web app.
 | [Monaco Editor](https://microsoft.github.io/monaco-editor/) integration                                                                                     | ✅        |
 | Real-time Candidate code editor                                                                                                                             | ✅        |
 | Real-time Interview notes editor                                                                                                                            | ✅        |
+| Test execution                                                                                                                                              | ❌        |
 
 | Languages          | Supported           |
 | ------------------ | ------------------- |
