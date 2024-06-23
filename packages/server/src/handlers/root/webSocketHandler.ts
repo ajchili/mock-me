@@ -48,7 +48,7 @@ export const handler: WebsocketHandler = (socket, request) => {
             type: "MODEL_CONTENT_CHANGED",
             data: {
               editorType,
-              changes: changes.filter((change) => change.sender !== id),
+              changes: changes.filter((change: any) => change.sender !== id),
             },
           })
         );
