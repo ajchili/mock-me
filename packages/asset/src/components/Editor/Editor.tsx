@@ -57,22 +57,13 @@ export const Editor = (props: EditorProps): JSX.Element => {
     window.addEventListener("resize", resize);
     monacoEl.current?.addEventListener("resize", resize);
 
-    return () => {
-      monacoEl.current?.removeEventListener("resize", resize);
-      window.removeEventListener("resize", resize);
-    };
-  }, [monacoEl]);
-
-  useEffect(() => {
-    if (initialized) {
-      return;
-    }
-
-    if (monacoEl) {
+    if (!initialized && monacoEl) {
       setEditor((editor) => {
         if (editor) return editor;
 
-        const newEditor = monaco.editor.create(monacoEl.current!, {
+        setInitialized(true);
+
+        return monaco.editor.create(monacoEl.current!, {
           // Default options
           fontSize: 14,
           tabSize: 2,
@@ -81,30 +72,42 @@ export const Editor = (props: EditorProps): JSX.Element => {
           language: props.language,
           theme: props.theme || "vs-dark",
         });
-
-        const ydoc = new Y.Doc();
-        const { hostname } = window.location;
-        const provider = new WebsocketProvider(
-          `ws://${hostname}:1234`,
-          props.room,
-          ydoc
-        );
-        const type = ydoc.getText("monaco");
-        const monacoBinding = new MonacoBinding(
-          type,
-          // @ts-expect-error
-          newEditor.getModel(),
-          new Set([newEditor]),
-          provider.awareness
-        );
-
-        return newEditor;
       });
-      setInitialized(true);
     }
 
-    return () => editor?.dispose();
-  }, [monacoEl.current]);
+    return () => {
+      monacoEl.current?.removeEventListener("resize", resize);
+      window.removeEventListener("resize", resize);
+      editor?.dispose();
+    };
+  }, [monacoEl]);
+
+  useEffect(() => {
+    if (!editor) {
+      return;
+    }
+
+    const ydoc = new Y.Doc();
+    const { hostname } = window.location;
+    const provider = new WebsocketProvider(
+      `ws://${hostname}:1234`,
+      props.room,
+      ydoc
+    );
+    const type = ydoc.getText("monaco");
+    const monacoBinding = new MonacoBinding(
+      type,
+      // @ts-expect-error
+      editor.getModel(),
+      new Set([editor]),
+      provider.awareness
+    );
+
+    return () => {
+      provider.destroy();
+      monacoBinding.destroy();
+    };
+  }, [editor]);
 
   return (
     <div className="flex w-full h-full flex-1 flex-col">
