@@ -1,6 +1,0 @@
-.turbo
-node_modules
-src
-Dockerfile
-.dockerignore
-tsconfig.json
