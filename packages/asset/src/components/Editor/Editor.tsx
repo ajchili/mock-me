@@ -3,7 +3,6 @@ import * as monaco from "monaco-editor";
 import * as Y from "yjs";
 import { WebsocketProvider } from "y-websocket";
 import { MonacoBinding } from "y-monaco";
-import { useStyles } from "./styles.js";
 
 // https://github.com/microsoft/monaco-editor/issues/2122#issuecomment-898307500
 
@@ -44,7 +43,6 @@ export const Editor = (props: EditorProps): JSX.Element => {
   const [editor, setEditor] =
     useState<monaco.editor.IStandaloneCodeEditor | null>(null);
   const monacoEl = useRef<HTMLDivElement>(null);
-  const styles = useStyles();
 
   editor?.updateOptions({
     ...props.options,
@@ -109,7 +107,7 @@ export const Editor = (props: EditorProps): JSX.Element => {
   }, [monacoEl.current]);
 
   return (
-    <div className={styles.container}>
+    <div className="flex w-full h-full flex-1 flex-col">
       <div className="flex-1" ref={monacoEl} />
     </div>
   );
