@@ -36,7 +36,7 @@ export class App extends pulumi.ComponentResource {
     const multiTargetLoadbalancer = new MultiTargetApplicationLoadBalancer(
       "app-loadbalancer",
       {
-        ports: [80, 6969, 1234],
+        ports: [80, 6969, 1234, 3000],
         parent: this,
       }
     );
@@ -76,6 +76,20 @@ export class App extends pulumi.ComponentResource {
                   containerPort: 6969,
                   hostPort: 6969,
                   targetGroup: multiTargetLoadbalancer.targetGroups[6969],
+                },
+              ],
+            },
+            leetcode: {
+              name: "leetcode",
+              image: "alfaarghya/alfa-leetcode-api:2.0.1",
+              cpu: 1,
+              memory: 512,
+              essential: true,
+              portMappings: [
+                {
+                  containerPort: 3000,
+                  hostPort: 3000,
+                  targetGroup: multiTargetLoadbalancer.targetGroups[3000],
                 },
               ],
             },
