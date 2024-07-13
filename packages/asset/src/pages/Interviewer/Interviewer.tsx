@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { RegisterMessage } from "@mock-me/messages";
-import { RemoteEditor } from "../../components/Editor/RemoteEditor.js";
+import { Editor } from "../../components/Editor/Editor.js";
 import { useStyles } from "./styles.js";
 import { SocketProvider } from "../../providers/socketProvider.js";
 
@@ -67,8 +67,8 @@ export const Interviewer = (): JSX.Element => {
             })}
           </div>
           {activeTab === 0 && (
-            <RemoteEditor
-              editorType="prompt"
+            <Editor
+              room="prompt"
               language="html"
               options={{ wordWrap: "on" }}
             />
@@ -89,16 +89,16 @@ export const Interviewer = (): JSX.Element => {
         </div>
         <div style={{ flex: 1, display: "flex" }}>
           <div style={{ flex: 1 }}>
-            <RemoteEditor
-              editorType="response"
+            <Editor
+              room="response"
               language="typescript"
               options={{ wordWrap: "on" }}
             />
           </div>
           <div style={{ display: "flex", flex: 1 }}>
             <div style={{ flex: 6 }}>
-              <RemoteEditor
-                editorType="notes"
+              <Editor
+                room="notes"
                 language="markdown"
                 options={{ wordWrap: "on" }}
               />

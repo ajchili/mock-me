@@ -14,7 +14,11 @@ export class App extends pulumi.ComponentResource {
     const assetImageRepository = new SelfContainedImageRepository("asset", {
       parent: this,
     });
-    const serverImageRepository = new SelfContainedImageRepository("server", {
+    const yjsImageRepository = new SelfContainedImageRepository("yjs", {
+      image: {
+        context: { location: "../../" },
+        dockerfile: { location: "../../yjs.Dockerfile" },
+      },
       parent: this,
     });
 
@@ -26,10 +30,13 @@ export class App extends pulumi.ComponentResource {
       { parent: this }
     );
 
-    const multiTargetLoadbalancer = new MultiTargetApplicationLoadBalancer("app-loadbalancer", {
-      ports: [80, 6969],
-      parent: this,
-    });
+    const multiTargetLoadbalancer = new MultiTargetApplicationLoadBalancer(
+      "app-loadbalancer",
+      {
+        ports: [80, 1234, 3000],
+        parent: this,
+      }
+    );
 
     this.loadbalancer = multiTargetLoadbalancer.loadbalancer;
 
@@ -55,17 +62,31 @@ export class App extends pulumi.ComponentResource {
                 },
               ],
             },
-            server: {
-              name: "server",
-              image: serverImageRepository.image.ref,
+            leetcode: {
+              name: "leetcode",
+              image: "alfaarghya/alfa-leetcode-api:2.0.1",
               cpu: 1,
               memory: 512,
               essential: true,
               portMappings: [
                 {
-                  containerPort: 6969,
-                  hostPort: 6969,
-                  targetGroup: multiTargetLoadbalancer.targetGroups[6969],
+                  containerPort: 3000,
+                  hostPort: 3000,
+                  targetGroup: multiTargetLoadbalancer.targetGroups[3000],
+                },
+              ],
+            },
+            yjs: {
+              name: "yjs",
+              image: yjsImageRepository.image.ref,
+              cpu: 1,
+              memory: 512,
+              essential: true,
+              portMappings: [
+                {
+                  containerPort: 1234,
+                  hostPort: 1234,
+                  targetGroup: multiTargetLoadbalancer.targetGroups[1234],
                 },
               ],
             },

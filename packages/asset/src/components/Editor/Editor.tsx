@@ -1,6 +1,8 @@
 import { useRef, useState, useEffect } from "react";
 import * as monaco from "monaco-editor";
-import { useStyles } from "./styles.js";
+import * as Y from "yjs";
+import { WebsocketProvider } from "y-websocket";
+import { MonacoBinding } from "y-monaco";
 
 // https://github.com/microsoft/monaco-editor/issues/2122#issuecomment-898307500
 
@@ -27,9 +29,7 @@ window.MonacoEnvironment = {
 };
 
 export interface EditorProps {
-  value: string;
-  changes?: monaco.editor.IModelContentChangedEvent["changes"];
-  onChange?: (event: monaco.editor.IModelContentChangedEvent) => void;
+  room: string;
   language?: string;
   theme?: "vs-light" | "vs-dark";
   options?: Omit<
@@ -43,7 +43,6 @@ export const Editor = (props: EditorProps): JSX.Element => {
   const [editor, setEditor] =
     useState<monaco.editor.IStandaloneCodeEditor | null>(null);
   const monacoEl = useRef<HTMLDivElement>(null);
-  const styles = useStyles();
 
   editor?.updateOptions({
     ...props.options,
@@ -58,39 +57,13 @@ export const Editor = (props: EditorProps): JSX.Element => {
     window.addEventListener("resize", resize);
     monacoEl.current?.addEventListener("resize", resize);
 
-    return () => {
-      monacoEl.current?.removeEventListener("resize", resize);
-      window.removeEventListener("resize", resize);
-    };
-  }, [monacoEl]);
-
-  useEffect(() => {
-    editor?.executeEdits("remote", props.changes || []);
-  }, [props.changes]);
-
-  useEffect(() => {
-    if (editor?.getValue() === props.value) {
-      return;
-    }
-
-    const position = editor?.getPosition();
-    editor?.setValue(props.value);
-    if (position) {
-      editor?.setPosition(position);
-    }
-  }, [props.value]);
-
-  useEffect(() => {
-    if (initialized) {
-      return;
-    }
-
-    if (monacoEl) {
+    if (!initialized && monacoEl) {
       setEditor((editor) => {
         if (editor) return editor;
 
+        setInitialized(true);
+
         return monaco.editor.create(monacoEl.current!, {
-          value: props.value,
           // Default options
           fontSize: 14,
           tabSize: 2,
@@ -98,32 +71,47 @@ export const Editor = (props: EditorProps): JSX.Element => {
           ...props.options,
           language: props.language,
           theme: props.theme || "vs-dark",
-          readOnly: true,
         });
       });
-      setInitialized(true);
     }
 
-    return () => editor?.dispose();
-  }, [monacoEl.current]);
+    return () => {
+      monacoEl.current?.removeEventListener("resize", resize);
+      window.removeEventListener("resize", resize);
+      editor?.dispose();
+    };
+  }, [monacoEl]);
 
   useEffect(() => {
     if (!editor) {
       return;
     }
 
-    const onDidChangeModelContent = editor.onDidChangeModelContent((event) =>
-      props.onChange?.(event)
+    const ydoc = new Y.Doc();
+    const { hostname } = window.location;
+    const provider = new WebsocketProvider(
+      `ws://${hostname}:1234`,
+      props.room,
+      ydoc
+    );
+    const type = ydoc.getText("monaco");
+    const monacoBinding = new MonacoBinding(
+      type,
+      // @ts-expect-error
+      editor.getModel(),
+      new Set([editor]),
+      provider.awareness
     );
 
     return () => {
-      onDidChangeModelContent.dispose();
+      provider.destroy();
+      monacoBinding.destroy();
     };
-  }, [props.value, props.changes, editor]);
+  }, [editor]);
 
   return (
-    <div className={styles.container}>
-      <div className={styles.editor} ref={monacoEl} />
+    <div className="flex w-full h-full flex-1 flex-col">
+      <div className="flex-1" ref={monacoEl} />
     </div>
   );
 };

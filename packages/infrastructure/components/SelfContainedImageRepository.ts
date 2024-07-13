@@ -1,11 +1,10 @@
 import * as pulumi from "@pulumi/pulumi";
 import * as aws from "@pulumi/aws";
-import * as docker from "@pulumi/docker";
 import * as dockerBuild from "@pulumi/docker-build";
 
 interface SelfContainedImageRepositoryOptions
   extends pulumi.ComponentResourceOptions {
-  image?: Pick<docker.types.input.DockerBuild, "context" | "dockerfile">;
+  image?: Pick<dockerBuild.ImageArgs, "context" | "dockerfile">;
 }
 
 // TODO: Think about this name. I am not sure that I like it.
@@ -41,6 +40,7 @@ export class SelfContainedImageRepository extends pulumi.ComponentResource {
             root: { location: "../../" },
           },
         },
+        ...options.image,
         cacheFrom: [
           {
             registry: {

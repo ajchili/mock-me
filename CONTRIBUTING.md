@@ -6,6 +6,7 @@
 
 - Node
 - npm
+- Docker
 
 ### 1. Fork & clone the repo
 
