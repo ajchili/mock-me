@@ -1,0 +1,6 @@
+{
+	"name": "@mock-me/dev",
+	"scripts": {
+		"start": "docker compose up"
+	}
+}
