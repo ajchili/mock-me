@@ -1,5 +1,8 @@
 import { useRef, useState, useEffect } from "react";
 import * as monaco from "monaco-editor";
+import * as Y from "yjs";
+import { WebsocketProvider } from "y-websocket";
+import { MonacoBinding } from "y-monaco";
 import { useStyles } from "./styles.js";
 
 // https://github.com/microsoft/monaco-editor/issues/2122#issuecomment-898307500
@@ -27,9 +30,7 @@ window.MonacoEnvironment = {
 };
 
 export interface EditorProps {
-  value: string;
-  changes?: monaco.editor.IModelContentChangedEvent["changes"];
-  onChange?: (event: monaco.editor.IModelContentChangedEvent) => void;
+  room: string;
   language?: string;
   theme?: "vs-light" | "vs-dark";
   options?: Omit<
@@ -65,22 +66,6 @@ export const Editor = (props: EditorProps): JSX.Element => {
   }, [monacoEl]);
 
   useEffect(() => {
-    editor?.executeEdits("remote", props.changes || []);
-  }, [props.changes]);
-
-  useEffect(() => {
-    if (editor?.getValue() === props.value) {
-      return;
-    }
-
-    const position = editor?.getPosition();
-    editor?.setValue(props.value);
-    if (position) {
-      editor?.setPosition(position);
-    }
-  }, [props.value]);
-
-  useEffect(() => {
     if (initialized) {
       return;
     }
@@ -89,8 +74,7 @@ export const Editor = (props: EditorProps): JSX.Element => {
       setEditor((editor) => {
         if (editor) return editor;
 
-        return monaco.editor.create(monacoEl.current!, {
-          value: props.value,
+        const newEditor = monaco.editor.create(monacoEl.current!, {
           // Default options
           fontSize: 14,
           tabSize: 2,
@@ -98,8 +82,25 @@ export const Editor = (props: EditorProps): JSX.Element => {
           ...props.options,
           language: props.language,
           theme: props.theme || "vs-dark",
-          readOnly: true,
         });
+
+        const ydoc = new Y.Doc();
+        const { hostname } = window.location;
+        const provider = new WebsocketProvider(
+          `ws://${hostname}:1234`,
+          props.room,
+          ydoc
+        );
+        const type = ydoc.getText("monaco");
+        const monacoBinding = new MonacoBinding(
+          type,
+          // @ts-expect-error
+          newEditor.getModel(),
+          new Set([newEditor]),
+          provider.awareness
+        );
+
+        return newEditor;
       });
       setInitialized(true);
     }
@@ -107,23 +108,9 @@ export const Editor = (props: EditorProps): JSX.Element => {
     return () => editor?.dispose();
   }, [monacoEl.current]);
 
-  useEffect(() => {
-    if (!editor) {
-      return;
-    }
-
-    const onDidChangeModelContent = editor.onDidChangeModelContent((event) =>
-      props.onChange?.(event)
-    );
-
-    return () => {
-      onDidChangeModelContent.dispose();
-    };
-  }, [props.value, props.changes, editor]);
-
   return (
     <div className={styles.container}>
-      <div className={styles.editor} ref={monacoEl} />
+      <div className="flex-1" ref={monacoEl} />
     </div>
   );
 };
