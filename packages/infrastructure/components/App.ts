@@ -17,6 +17,13 @@ export class App extends pulumi.ComponentResource {
     const serverImageRepository = new SelfContainedImageRepository("server", {
       parent: this,
     });
+    const yjsImageRepository = new SelfContainedImageRepository("yjs", {
+      image: {
+        context: { location: "../../" },
+        dockerfile: { location: "../../yjs.Dockerfile" },
+      },
+      parent: this,
+    });
 
     const cluster = new aws.ecs.Cluster(
       "cluster",
@@ -26,10 +33,13 @@ export class App extends pulumi.ComponentResource {
       { parent: this }
     );
 
-    const multiTargetLoadbalancer = new MultiTargetApplicationLoadBalancer("app-loadbalancer", {
-      ports: [80, 6969],
-      parent: this,
-    });
+    const multiTargetLoadbalancer = new MultiTargetApplicationLoadBalancer(
+      "app-loadbalancer",
+      {
+        ports: [80, 6969, 1234],
+        parent: this,
+      }
+    );
 
     this.loadbalancer = multiTargetLoadbalancer.loadbalancer;
 
@@ -66,6 +76,20 @@ export class App extends pulumi.ComponentResource {
                   containerPort: 6969,
                   hostPort: 6969,
                   targetGroup: multiTargetLoadbalancer.targetGroups[6969],
+                },
+              ],
+            },
+            yjs: {
+              name: "yjs",
+              image: yjsImageRepository.image.ref,
+              cpu: 1,
+              memory: 512,
+              essential: true,
+              portMappings: [
+                {
+                  containerPort: 1234,
+                  hostPort: 1234,
+                  targetGroup: multiTargetLoadbalancer.targetGroups[1234],
                 },
               ],
             },
