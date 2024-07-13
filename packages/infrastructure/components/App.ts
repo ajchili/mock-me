@@ -14,9 +14,6 @@ export class App extends pulumi.ComponentResource {
     const assetImageRepository = new SelfContainedImageRepository("asset", {
       parent: this,
     });
-    const serverImageRepository = new SelfContainedImageRepository("server", {
-      parent: this,
-    });
     const yjsImageRepository = new SelfContainedImageRepository("yjs", {
       image: {
         context: { location: "../../" },
@@ -36,7 +33,7 @@ export class App extends pulumi.ComponentResource {
     const multiTargetLoadbalancer = new MultiTargetApplicationLoadBalancer(
       "app-loadbalancer",
       {
-        ports: [80, 6969, 1234, 3000],
+        ports: [80, 1234, 3000],
         parent: this,
       }
     );
@@ -62,20 +59,6 @@ export class App extends pulumi.ComponentResource {
                   containerPort: 80,
                   hostPort: 80,
                   targetGroup: multiTargetLoadbalancer.targetGroups[80],
-                },
-              ],
-            },
-            server: {
-              name: "server",
-              image: serverImageRepository.image.ref,
-              cpu: 1,
-              memory: 512,
-              essential: true,
-              portMappings: [
-                {
-                  containerPort: 6969,
-                  hostPort: 6969,
-                  targetGroup: multiTargetLoadbalancer.targetGroups[6969],
                 },
               ],
             },
