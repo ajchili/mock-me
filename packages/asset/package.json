@@ -10,7 +10,6 @@
   "author": "Kirin Patel <contact@kirinpatel.com>",
   "license": "MIT",
   "devDependencies": {
-    "@mock-me/messages": "*",
     "@tsconfig/node20": "^20.1.4",
     "@types/react": "^18.3.2",
     "@types/react-dom": "^18.3.0",
