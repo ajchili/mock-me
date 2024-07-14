@@ -2,11 +2,33 @@
 @tailwind components;
 @tailwind utilities;
 
-/* LeetCode enjoys using pre tags for example inputs, these can overflow. This prevents the overflow. */
-pre {
-  white-space: pre-wrap;
-  white-space: -moz-pre-wrap;
-  white-space: -pre-wrap;
-  white-space: -o-pre-wrap;
-  word-wrap: break-word;
+@layer components {
+  /* LeetCode enjoys using pre tags for example inputs, these can overflow. This prevents the overflow. */
+  pre {
+    white-space: pre-wrap;
+    white-space: -moz-pre-wrap;
+    white-space: -pre-wrap;
+    white-space: -o-pre-wrap;
+    word-wrap: break-word;
+  }
+
+  code {
+    @apply rounded-sm bg-gray-50 p-1 text-xs font-mono text-gray-600 ring-1 ring-inset ring-gray-500/10;
+  }
+
+  .difficulty-badge {
+    @apply inline-flex items-center rounded-md bg-gray-50 px-2 py-1 text-xs font-medium text-gray-600 ring-1 ring-inset ring-gray-500/10;
+  }
+
+  .difficulty-badge.easy {
+    @apply bg-green-50 text-green-600 ring-green-500/10;
+  }
+
+  .difficulty-badge.medium {
+    @apply bg-yellow-50 text-yellow-600 ring-yellow-500/10;
+  }
+
+  .difficulty-badge.hard {
+    @apply bg-red-50 text-red-600 ring-red-500/10;
+  }
 }

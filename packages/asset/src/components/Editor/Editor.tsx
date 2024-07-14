@@ -39,7 +39,6 @@ export interface EditorProps {
 }
 
 export const Editor = (props: EditorProps): JSX.Element => {
-  const [initialized, setInitialized] = useState(false);
   const [editor, setEditor] =
     useState<monaco.editor.IStandaloneCodeEditor | null>(null);
   const monacoEl = useRef<HTMLDivElement>(null);
@@ -53,41 +52,23 @@ export const Editor = (props: EditorProps): JSX.Element => {
   };
 
   useEffect(() => {
-    // https://github.com/Microsoft/monaco-editor/issues/28#issuecomment-228523529
-    window.addEventListener("resize", resize);
-    monacoEl.current?.addEventListener("resize", resize);
-
-    if (!initialized && monacoEl) {
-      setEditor((editor) => {
-        if (editor) return editor;
-
-        setInitialized(true);
-
-        return monaco.editor.create(monacoEl.current!, {
-          // Default options
-          fontSize: 14,
-          tabSize: 2,
-          // Overwritten options
-          ...props.options,
-          language: props.language,
-          theme: props.theme || "vs-dark",
-        });
-      });
-    }
-
-    return () => {
-      monacoEl.current?.removeEventListener("resize", resize);
-      window.removeEventListener("resize", resize);
-      editor?.dispose();
-    };
-  }, [monacoEl]);
-
-  useEffect(() => {
-    if (!editor) {
+    if (!monacoEl.current) {
       return;
     }
 
-    const ydoc = new Y.Doc();
+    const newEditor = monaco.editor.create(monacoEl.current!, {
+      // Default options
+      fontSize: 14,
+      tabSize: 2,
+      // Overwritten options
+      ...props.options,
+      language: props.language,
+      theme: props.theme || "vs-dark",
+      automaticLayout: true,
+    });
+
+    setEditor(newEditor);
+    const ydoc = new Y.Doc({ autoLoad: true });
     const { hostname } = window.location;
     const provider = new WebsocketProvider(
       `ws://${hostname}:1234`,
@@ -98,20 +79,24 @@ export const Editor = (props: EditorProps): JSX.Element => {
     const monacoBinding = new MonacoBinding(
       type,
       // @ts-expect-error
-      editor.getModel(),
-      new Set([editor]),
+      newEditor.getModel(),
+      new Set([newEditor]),
       provider.awareness
     );
+
+    // https://github.com/Microsoft/monaco-editor/issues/28#issuecomment-228523529
+    window.addEventListener("resize", resize);
+    monacoEl.current.addEventListener("resize", resize);
 
     return () => {
       provider.destroy();
       monacoBinding.destroy();
-    };
-  }, [editor]);
 
-  return (
-    <div className="flex w-full h-full flex-1 flex-col">
-      <div className="flex-1" ref={monacoEl} />
-    </div>
-  );
+      editor?.dispose();
+      window.removeEventListener("resize", resize);
+      monacoEl.current?.removeEventListener("resize", resize);
+    };
+  }, [props]);
+
+  return <div className="flex-1" ref={monacoEl} />;
 };
