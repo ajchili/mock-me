@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import * as Y from "yjs";
 import { WebsocketProvider } from "y-websocket";
 
@@ -6,6 +7,12 @@ import { Button } from "../Button/Button.js";
 
 export const Navbar = () => {
   const [isExporting, setIsExporting] = useState(false);
+
+  const navigate = useNavigate();
+
+  const navigateToHome = () => {
+    navigate("/");
+  };
 
   const onExport = async () => {
     const { hostname } = window.location;
@@ -56,7 +63,7 @@ export const Navbar = () => {
 
   return (
     <div className="bg-slate-800 flex justify-between p-2">
-      <span className="text-3xl text-white">👉🏽👈🏽 mock me</span>
+      <span className="text-3xl text-white" onClick={navigateToHome}>👉🏽👈🏽 mock me</span>
       <Button isLoading={isExporting} onClick={onExport}>
         💾 export
       </Button>
