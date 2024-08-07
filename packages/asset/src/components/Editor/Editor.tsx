@@ -39,6 +39,7 @@ export interface EditorProps {
 }
 
 export const Editor = (props: EditorProps): JSX.Element => {
+  const [connected, setConnected] = useState(false);
   const [editor, setEditor] =
     useState<monaco.editor.IStandaloneCodeEditor | null>(null);
   const monacoEl = useRef<HTMLDivElement>(null);
@@ -90,7 +91,12 @@ export const Editor = (props: EditorProps): JSX.Element => {
       }
     };
 
+    const onStatus = (e: any) => {
+      setConnected(e.status === "connected");
+    };
+
     provider.on("synced", initialLoad);
+    provider.on("status", onStatus);
 
     // https://github.com/Microsoft/monaco-editor/issues/28#issuecomment-228523529
     window.addEventListener("resize", resize);
@@ -104,8 +110,18 @@ export const Editor = (props: EditorProps): JSX.Element => {
       window.removeEventListener("resize", resize);
       monacoEl.current?.removeEventListener("resize", resize);
       provider.off("synced", initialLoad);
+      provider.off("status", onStatus);
     };
   }, [props]);
 
-  return <div className="flex-1" ref={monacoEl} />;
+  return (
+    <div className="flex flex-1 flex-col">
+      <div className="flex flex-grow" ref={monacoEl} />
+      <div className="flex bg-slate-800 flex-shrink-0 justify-between py-1">
+        <span className={`px-2 ${connected ? "text-white" : `text-red-300`}`}>
+          {connected ? "Connected 🟢" : "Disconnected 🔴"}
+        </span>
+      </div>
+    </div>
+  );
 };
