@@ -84,6 +84,14 @@ export const Editor = (props: EditorProps): JSX.Element => {
       provider.awareness
     );
 
+    const initialLoad = () => {
+      if(props.room === "notes" && type.length === 0) {
+        type.insert(0, "Interview Notes");
+      }
+    };
+
+    provider.on("synced", initialLoad);
+
     // https://github.com/Microsoft/monaco-editor/issues/28#issuecomment-228523529
     window.addEventListener("resize", resize);
     monacoEl.current.addEventListener("resize", resize);
@@ -95,6 +103,7 @@ export const Editor = (props: EditorProps): JSX.Element => {
       editor?.dispose();
       window.removeEventListener("resize", resize);
       monacoEl.current?.removeEventListener("resize", resize);
+      provider.off("synced", initialLoad);
     };
   }, [props]);
 
