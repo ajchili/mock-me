@@ -17,7 +17,7 @@ export const InterviewerActions = () => {
 
   const loadQuestion = async (titleSlug: string) => {
     const response = await fetch(
-      `http://${window.location.hostname}:3000/select?titleSlug=${titleSlug}`
+      `http://${window.location.hostname}:1234/api/leetcode/select?titleSlug=${titleSlug}`
     );
     const { difficulty, question } = await response.json();
 
@@ -30,7 +30,7 @@ export const InterviewerActions = () => {
 
   const selectDailyQuestion = async () => {
     const response = await fetch(
-      `http://${window.location.hostname}:3000/dailyQuestion`
+      `http://${window.location.hostname}:1234/api/leetcode/dailyQuestion`
     );
     const { data } = await response.json();
 
@@ -40,11 +40,13 @@ export const InterviewerActions = () => {
   };
 
   const selectQuestion = async () => {
-		const titleSlug = prompt("Select LeetCode question. Please provide the slug (e.g. \"two-sum\").");
+    const titleSlug = prompt(
+      'Select LeetCode question. Please provide the slug (e.g. "two-sum").'
+    );
 
-		if (titleSlug) {
-			await loadQuestion(titleSlug);
-		}
+    if (titleSlug) {
+      await loadQuestion(titleSlug);
+    }
   };
 
   const selectRandomQuestion = async () => {
@@ -52,7 +54,9 @@ export const InterviewerActions = () => {
     const response = await fetch(
       `http://${
         window.location.hostname
-      }:3000/problems?limit=2&skip=${Math.floor(Math.random() * 3219)}`
+      }:1234/api/leetcode/problems?limit=2&skip=${Math.floor(
+        Math.random() * 3219
+      )}`
     );
     const { problemsetQuestionList } = await response.json();
 

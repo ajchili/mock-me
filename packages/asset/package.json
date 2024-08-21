@@ -5,6 +5,7 @@
   "type": "module",
   "scripts": {
     "build": "vite build",
+    "copy-dist": "rsync -r dist/* ../server/asset",
     "start": "vite"
   },
   "author": "Kirin Patel <contact@kirinpatel.com>",

@@ -1,7 +1,0 @@
-{
-  "name": "@mock-me/local-dev-server",
-  "private": true,
-  "scripts": {
-    "start": "docker compose up"
-  }
-}
