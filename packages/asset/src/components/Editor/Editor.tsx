@@ -1,8 +1,9 @@
 import { useRef, useState, useEffect } from "react";
 import * as monaco from "monaco-editor";
 import * as Y from "yjs";
-import { WebsocketProvider } from "y-websocket";
 import { MonacoBinding } from "y-monaco";
+
+import { buildWebsocketProvider } from "../../providers/websocket.js";
 
 // https://github.com/microsoft/monaco-editor/issues/2122#issuecomment-898307500
 
@@ -70,12 +71,7 @@ export const Editor = (props: EditorProps): JSX.Element => {
 
     setEditor(newEditor);
     const ydoc = new Y.Doc({ autoLoad: true });
-    const { hostname } = window.location;
-    const provider = new WebsocketProvider(
-      `ws://${hostname}:1234`,
-      props.room,
-      ydoc
-    );
+    const provider = buildWebsocketProvider(props.room, ydoc);
     const type = ydoc.getText("monaco");
     const monacoBinding = new MonacoBinding(
       type,
@@ -86,7 +82,7 @@ export const Editor = (props: EditorProps): JSX.Element => {
     );
 
     const initialLoad = () => {
-      if(props.room === "notes" && type.length === 0) {
+      if (props.room === "notes" && type.length === 0) {
         type.insert(0, "Interview Notes");
       }
     };

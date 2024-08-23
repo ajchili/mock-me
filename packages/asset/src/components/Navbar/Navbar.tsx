@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import * as Y from "yjs";
-import { WebsocketProvider } from "y-websocket";
 
 import { Button } from "../Button/Button.js";
+import { buildWebsocketProvider } from "../../providers/websocket.js";
 
 export const Navbar = () => {
   const [isExporting, setIsExporting] = useState(false);
@@ -15,7 +15,6 @@ export const Navbar = () => {
   };
 
   const onExport = async () => {
-    const { hostname } = window.location;
     setIsExporting(true);
 
     try {
@@ -23,11 +22,7 @@ export const Navbar = () => {
         ["prompt", "response", "notes"].map((room) => {
           return new Promise((resolve, reject) => {
             const ydoc = new Y.Doc({ autoLoad: true });
-            const provider = new WebsocketProvider(
-              `ws://${hostname}:1234`,
-              room,
-              ydoc
-            );
+            const provider = buildWebsocketProvider(room, ydoc);
 
             const timeout = setTimeout(() => reject(), 10000);
 
@@ -63,7 +58,9 @@ export const Navbar = () => {
 
   return (
     <div className="bg-slate-800 flex justify-between p-2">
-      <span className="text-3xl text-white" onClick={navigateToHome}>👉🏽👈🏽 mock me</span>
+      <span className="text-3xl text-white" onClick={navigateToHome}>
+        👉🏽👈🏽 mock me
+      </span>
       <Button isLoading={isExporting} onClick={onExport}>
         💾 export
       </Button>

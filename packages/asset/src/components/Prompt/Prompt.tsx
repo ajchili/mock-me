@@ -1,18 +1,14 @@
 import { useEffect, useState } from "react";
 import * as Y from "yjs";
-import { WebsocketProvider } from "y-websocket";
+
+import { buildWebsocketProvider } from "../../providers/websocket.js";
 
 export const Prompt = (): JSX.Element => {
   const [prompt, setPrompt] = useState("");
 
   useEffect(() => {
     const ydoc = new Y.Doc();
-    const { hostname } = window.location;
-    const provider = new WebsocketProvider(
-      `ws://${hostname}:1234`,
-      "prompt",
-      ydoc
-    );
+    const provider = buildWebsocketProvider("prompt", ydoc);
 
     ydoc.on("update", () => {
       setPrompt(ydoc.getText("monaco").toString());

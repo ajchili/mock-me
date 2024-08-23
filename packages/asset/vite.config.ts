@@ -16,4 +16,14 @@ export default defineConfig({
       },
     },
   },
+  server: {
+    proxy: {
+      "/": {
+        target: "ws://localhost:1234",
+        ws: true,
+        rewriteWsOrigin: true,
+      },
+      "/api": "http://localhost:1234",
+    },
+  },
 });

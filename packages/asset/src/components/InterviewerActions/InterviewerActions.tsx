@@ -1,13 +1,13 @@
 import * as Y from "yjs";
-import { WebsocketProvider } from "y-websocket";
 
 import { Button } from "../Button/Button.js";
+import { buildWebsocketProvider } from "../../providers/websocket.js";
+import { LeetCodeApi } from "../../api/leetcode.js";
 
 export const InterviewerActions = () => {
   const writeToDoc = (room: string, content: string) => {
     const ydoc = new Y.Doc();
-    const { hostname } = window.location;
-    const provider = new WebsocketProvider(`ws://${hostname}:1234`, room, ydoc);
+    const provider = buildWebsocketProvider(room, ydoc);
 
     ydoc.getText("monaco").delete(0, ydoc.getText("monaco").length);
     ydoc.getText("monaco").insert(0, content);
@@ -16,10 +16,9 @@ export const InterviewerActions = () => {
   };
 
   const loadQuestion = async (titleSlug: string) => {
-    const response = await fetch(
-      `http://${window.location.hostname}:1234/api/leetcode/select?titleSlug=${titleSlug}`
+    const { difficulty, question } = await LeetCodeApi.getQuestionByTitleSlug(
+      titleSlug
     );
-    const { difficulty, question } = await response.json();
 
     writeToDoc("response", "function solution() {\n\t\n}");
     writeToDoc(
@@ -29,10 +28,7 @@ export const InterviewerActions = () => {
   };
 
   const selectDailyQuestion = async () => {
-    const response = await fetch(
-      `http://${window.location.hostname}:1234/api/leetcode/dailyQuestion`
-    );
-    const { data } = await response.json();
+    const { data } = await LeetCodeApi.getDailyQuestion();
 
     await loadQuestion(
       data.activeDailyCodingChallengeQuestion.question.titleSlug
@@ -50,15 +46,7 @@ export const InterviewerActions = () => {
   };
 
   const selectRandomQuestion = async () => {
-    // Pending: https://github.com/alfaarghya/alfa-leetcode-api/pull/27
-    const response = await fetch(
-      `http://${
-        window.location.hostname
-      }:1234/api/leetcode/problems?limit=2&skip=${Math.floor(
-        Math.random() * 3219
-      )}`
-    );
-    const { problemsetQuestionList } = await response.json();
+    const { problemsetQuestionList } = await LeetCodeApi.getRandomQuestion();
 
     await loadQuestion(problemsetQuestionList[0].titleSlug);
   };
