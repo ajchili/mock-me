@@ -1,4 +1,5 @@
 import { useRef, useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import * as monaco from "monaco-editor";
 import * as Y from "yjs";
 import { MonacoBinding } from "y-monaco";
@@ -44,6 +45,8 @@ export const Editor = (props: EditorProps): JSX.Element => {
   const [editor, setEditor] =
     useState<monaco.editor.IStandaloneCodeEditor | null>(null);
   const monacoEl = useRef<HTMLDivElement>(null);
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
 
   editor?.updateOptions({
     ...props.options,
@@ -55,6 +58,12 @@ export const Editor = (props: EditorProps): JSX.Element => {
 
   useEffect(() => {
     if (!monacoEl.current) {
+      return;
+    }
+
+    const roomId = searchParams.get("roomId");
+    if (!roomId) {
+      navigate("/")
       return;
     }
 
@@ -72,7 +81,7 @@ export const Editor = (props: EditorProps): JSX.Element => {
     setEditor(newEditor);
     const ydoc = new Y.Doc({ autoLoad: true });
     const provider = buildWebsocketProvider(props.room, ydoc);
-    const type = ydoc.getText("monaco");
+    const type = ydoc.getText(roomId);
     const monacoBinding = new MonacoBinding(
       type,
       // @ts-expect-error
