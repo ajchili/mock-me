@@ -13,6 +13,9 @@ const app = express();
 
 app.use(cors());
 app.use(express.static("asset"));
+// Not sure of a better way to distribute the web asset for routes when using the browser router
+app.use("/candidate", express.static("asset"));
+app.use("/interviewer", express.static("asset"));
 app.use("/api/leetcode", leetcode.router);
 
 const server = app.listen(port, hostname);
