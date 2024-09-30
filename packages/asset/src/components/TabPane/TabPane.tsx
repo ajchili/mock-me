@@ -11,7 +11,7 @@ export const TabPane = ({ tabs }: TabPaneProps) => {
   const [activeTab, setActiveTab] = useState(0);
 
   return (
-    <div className="flex flex-1 flex-col overflow-hidden">
+    <div className="flex flex-1 flex-col max-h-[40vh]">
       <div className="flex flex-row">
         {tabs.map(({ title }, index) => (
           <button
@@ -27,7 +27,7 @@ export const TabPane = ({ tabs }: TabPaneProps) => {
       </div>
       <div
         key={`tab-content-${activeTab}`}
-        className="flex flex-1 overflow-y-scroll"
+        className="flex flex-1 overflow-scroll"
       >
         {tabs[activeTab].children}
       </div>
