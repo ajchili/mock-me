@@ -10,7 +10,7 @@ export const Interviewer = (): JSX.Element => {
       <Navbar />
       <div className="flex w-full flex-grow">
         <Editor
-          room="response"
+          type="response"
           language="typescript"
           options={{ wordWrap: "on" }}
         />
@@ -25,7 +25,7 @@ export const Interviewer = (): JSX.Element => {
                 title: "Prompt Editor",
                 children: (
                   <Editor
-                    room="prompt"
+                    type="prompt"
                     language="html"
                     options={{ wordWrap: "on" }}
                   />
@@ -38,7 +38,7 @@ export const Interviewer = (): JSX.Element => {
             ]}
           />
           <Editor
-            room="notes"
+            type="notes"
             language="markdown"
             options={{ wordWrap: "on" }}
           />

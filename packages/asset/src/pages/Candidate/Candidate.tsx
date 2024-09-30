@@ -4,11 +4,11 @@ import { Prompt } from "../../components/Prompt/Prompt.js";
 
 export const Candidate = (): JSX.Element => {
   return (
-    <div className="flex flex-col w-full h-dvh">
+    <div className="flex flex-col w-full h-dvh max-h-dvh">
       <Navbar />
       <div className="flex w-full flex-grow">
         <Prompt />
-        <Editor room="response" language="typescript" />
+        <Editor type="response" language="typescript" />
       </div>
     </div>
   );

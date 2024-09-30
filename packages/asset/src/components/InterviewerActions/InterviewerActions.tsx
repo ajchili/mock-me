@@ -1,16 +1,26 @@
 import * as Y from "yjs";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 import { Button } from "../Button/Button.js";
 import { buildWebsocketProvider } from "../../providers/websocket.js";
 import { LeetCodeApi } from "../../api/leetcode.js";
 
 export const InterviewerActions = () => {
-  const writeToDoc = (room: string, content: string) => {
-    const ydoc = new Y.Doc();
-    const provider = buildWebsocketProvider(room, ydoc);
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
 
-    ydoc.getText("monaco").delete(0, ydoc.getText("monaco").length);
-    ydoc.getText("monaco").insert(0, content);
+  const roomId = searchParams.get("roomId");
+  if (!roomId) {
+    navigate("/");
+    return;
+  }
+
+  const writeToDoc = (doc: string, content: string) => {
+    const ydoc = new Y.Doc();
+    const provider = buildWebsocketProvider(roomId, ydoc);
+
+    ydoc.getText(doc).delete(0, ydoc.getText(doc).length);
+    ydoc.getText(doc).insert(0, content);
     // Disconnect after assuming that delete and insert were successful
     setTimeout(() => provider.destroy(), 1000);
   };

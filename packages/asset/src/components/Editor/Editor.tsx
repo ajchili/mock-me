@@ -31,7 +31,7 @@ window.MonacoEnvironment = {
 };
 
 export interface EditorProps {
-  room: string;
+  type: "response" | "prompt" | "notes";
   language?: string;
   theme?: "vs-light" | "vs-dark";
   options?: Omit<
@@ -63,7 +63,7 @@ export const Editor = (props: EditorProps): JSX.Element => {
 
     const roomId = searchParams.get("roomId");
     if (!roomId) {
-      navigate("/")
+      navigate("/");
       return;
     }
 
@@ -80,8 +80,8 @@ export const Editor = (props: EditorProps): JSX.Element => {
 
     setEditor(newEditor);
     const ydoc = new Y.Doc({ autoLoad: true });
-    const provider = buildWebsocketProvider(props.room, ydoc);
-    const type = ydoc.getText(roomId);
+    const provider = buildWebsocketProvider(roomId, ydoc);
+    const type = ydoc.getText(props.type);
     const monacoBinding = new MonacoBinding(
       type,
       // @ts-expect-error
@@ -91,7 +91,7 @@ export const Editor = (props: EditorProps): JSX.Element => {
     );
 
     const initialLoad = () => {
-      if (props.room === "notes" && type.length === 0) {
+      if (props.type === "notes" && type.length === 0) {
         type.insert(0, "Interview Notes");
       }
     };

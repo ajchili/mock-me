@@ -1,17 +1,27 @@
 import { useEffect, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import * as Y from "yjs";
 
 import { buildWebsocketProvider } from "../../providers/websocket.js";
 
-export const Prompt = (): JSX.Element => {
+export const Prompt = () => {
   const [prompt, setPrompt] = useState("");
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+
+  const roomId = searchParams.get("roomId");
+  if (!roomId) {
+    navigate("/");
+    return;
+  }
 
   useEffect(() => {
-    const ydoc = new Y.Doc();
-    const provider = buildWebsocketProvider("prompt", ydoc);
+    const ydoc = new Y.Doc({ autoLoad: true });
+    const provider = buildWebsocketProvider(roomId, ydoc);
 
+    setPrompt(ydoc.getText("prompt").toString());
     ydoc.on("update", () => {
-      setPrompt(ydoc.getText("monaco").toString());
+      setPrompt(ydoc.getText("prompt").toString());
     });
 
     return () => {
