@@ -6,7 +6,7 @@ export const Candidate = (): JSX.Element => {
   return (
     <div className="flex flex-col w-full h-dvh max-h-dvh">
       <Navbar />
-      <div className="flex w-full flex-grow">
+      <div className="flex w-full flex-grow overflow-scroll">
         <Prompt />
         <Editor type="response" language="typescript" />
       </div>

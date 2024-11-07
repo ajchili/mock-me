@@ -32,7 +32,7 @@ export const Prompt = () => {
 
   return (
     <div
-      className="flex w-full flex-1 flex-col gap-4 overflow-y-auto px-4 py-5"
+      className="flex min-w-[50%] flex-1 flex-col gap-4 overflow-y-auto px-4 py-5"
       dangerouslySetInnerHTML={{ __html: prompt }}
     />
   );
