@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import * as Y from "yjs";
 
 import { Button } from "../Button/Button.js";
@@ -7,6 +7,7 @@ import { buildWebsocketProvider } from "../../providers/websocket.js";
 
 export const Navbar = () => {
   const [isExporting, setIsExporting] = useState(false);
+  const [searchParams] = useSearchParams();
 
   const navigate = useNavigate();
 
@@ -56,14 +57,32 @@ export const Navbar = () => {
     }
   };
 
+  const onInvite = () => {
+    const roomId = searchParams.get("roomId");
+
+    if (!roomId) {
+      return;
+    }
+
+    console.log(window.location);
+
+    const url = new URL(window.origin);
+    url.searchParams.set("roomId", roomId);
+
+    navigator.clipboard.writeText(url.toString());
+  };
+
   return (
     <div className="bg-slate-800 flex justify-between p-2">
       <span className="text-3xl text-white" onClick={navigateToHome}>
         👉🏽👈🏽 mock me
       </span>
-      <Button isLoading={isExporting} onClick={onExport}>
-        💾 export
-      </Button>
+      <div className="flex gap-2">
+        <Button onClick={onInvite}>Invite</Button>
+        <Button isLoading={isExporting} onClick={onExport}>
+          💾 export
+        </Button>
+      </div>
     </div>
   );
 };

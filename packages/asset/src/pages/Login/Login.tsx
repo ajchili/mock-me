@@ -1,5 +1,5 @@
-import { useCallback, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useCallback, useEffect, useState } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Button } from "../../components/Button/Button.js";
 import type { Role, SessionType } from "./types.js";
 import { getRoleFromValue, getSessionTypeFromValue } from "./utils.js";
@@ -9,6 +9,16 @@ export const Login = (): JSX.Element => {
   const [sessionType, setSessionType] = useState<SessionType>("new");
   const [roomId, setRoomId] = useState<string>("");
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  useEffect(() => {
+    const roomId = searchParams.get("roomId");
+
+    if (roomId) {
+      setSessionType("existing")
+      setRoomId(roomId);
+    }
+  }, []);
 
   const start = useCallback(() => {
     if (sessionType === "existing" && roomId.length === 0) {
