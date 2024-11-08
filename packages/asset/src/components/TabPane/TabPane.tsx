@@ -11,7 +11,7 @@ export const TabPane = ({ tabs }: TabPaneProps) => {
   const [activeTab, setActiveTab] = useState(0);
 
   return (
-    <div className="flex flex-1 flex-col max-h-[40vh]">
+    <div className="flex flex-1 flex-col">
       <div className="flex flex-row">
         {tabs.map(({ title }, index) => (
           <button

@@ -52,10 +52,6 @@ export const Editor = (props: EditorProps): JSX.Element => {
     ...props.options,
   });
 
-  const resize = () => {
-    editor?.layout();
-  };
-
   useEffect(() => {
     if (!monacoEl.current) {
       return;
@@ -103,17 +99,33 @@ export const Editor = (props: EditorProps): JSX.Element => {
     provider.on("synced", initialLoad);
     provider.on("status", onStatus);
 
+    const onResize = () => {
+      const domNode = newEditor.getDomNode();
+      const $editor = domNode?.parentElement;
+      const $panel = $editor?.parentElement?.parentElement;
+      const $footer = $editor?.parentElement?.lastElementChild;
+
+      if ($editor && $panel) {
+        newEditor.layout({
+          width: $panel.clientWidth,
+          height: $panel.clientHeight - ($footer?.clientHeight ?? 0),
+        });
+      }
+    };
     // https://github.com/Microsoft/monaco-editor/issues/28#issuecomment-228523529
-    window.addEventListener("resize", resize);
-    monacoEl.current.addEventListener("resize", resize);
+    window.addEventListener("resize", onResize);
+    const observer = new ResizeObserver(onResize);
+    if (monacoEl.current.parentElement?.parentElement) {
+      observer.observe(monacoEl.current.parentElement.parentElement);
+    }
 
     return () => {
       provider.destroy();
       monacoBinding.destroy();
 
       editor?.dispose();
-      window.removeEventListener("resize", resize);
-      monacoEl.current?.removeEventListener("resize", resize);
+      window.removeEventListener("resize", onResize);
+      observer.disconnect();
       provider.off("synced", initialLoad);
       provider.off("status", onStatus);
     };
