@@ -1,10 +1,12 @@
 import { useCallback, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../../components/Button/Button.js";
+import type { Role, SessionType } from "./types.js";
+import { getRoleFromValue, getSessionTypeFromValue } from "./utils.js";
 
 export const Login = (): JSX.Element => {
-  const [role, setRole] = useState<string>("candidate");
-  const [sessionType, setSessionType] = useState<string>("existing");
+  const [role, setRole] = useState<Role>("candidate");
+  const [sessionType, setSessionType] = useState<SessionType>("new");
   const [roomId, setRoomId] = useState<string>("");
   const navigate = useNavigate();
 
@@ -24,23 +26,25 @@ export const Login = (): JSX.Element => {
     <div className="w-full h-dvh flex flex-col items-center justify-center gap-4 bg-gradient-to-t from-slate-950 to-slate-800">
       <span className="text-3xl text-white">👉🏽👈🏽 mock me</span>
       <span className="text-l text-white">
-        I am a
+        I am {role === "candidate" ? "a" : "an"}
         <select
           className="bg-transparent border-0 border-b-2 border-white border-solid mx-2"
           value={role}
-          onChange={(e) => setRole(e.target.value)}
+          onChange={(e) => setRole(getRoleFromValue(e.target.value))}
         >
           <option value="candidate">candidate 🧑‍🎓</option>
           <option value="interviewer">interviewer 🧑‍🏫</option>
         </select>
-        and I will join an
+        and I will {sessionType === "new" ? "start a" : "join an"}
         <select
           className="bg-transparent border-0 border-b-2 border-white border-solid mx-2"
           value={sessionType}
-          onChange={(e) => setSessionType(e.target.value)}
+          onChange={(e) =>
+            setSessionType(getSessionTypeFromValue(e.target.value))
+          }
         >
-          <option value="existing">existing</option>
           <option value="new">new</option>
+          <option value="existing">existing</option>
         </select>
       </span>
       <div className="flex gap-4">
@@ -52,7 +56,9 @@ export const Login = (): JSX.Element => {
             onChange={(e) => setRoomId(e.target.value)}
           />
         )}
-        <Button onClick={start}>{sessionType === "new" ? "Start" : "Join"} Session</Button>
+        <Button onClick={start}>
+          {sessionType === "new" ? "Start" : "Join"} Session
+        </Button>
       </div>
     </div>
   );
