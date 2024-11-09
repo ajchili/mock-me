@@ -1,5 +1,7 @@
 FROM node:20-alpine
 
+ARG LEETCODE_API_ENDPOINT
+
 COPY ./packages/server/dist .
 COPY ./packages/server/package.json .
 COPY ./packages/asset/dist asset

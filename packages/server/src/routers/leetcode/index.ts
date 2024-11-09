@@ -1,12 +1,12 @@
 import { Router } from "express";
 
-const ENDPOINT = "https://alfa-leetcode-api.onrender.com";
+const { LEETCODE_API_ENDPOINT = "http://localhost:3000" } = process.env;
 
 const router = Router();
 
 router.get("*", async (request, response) => {
   try {
-    const url = new URL(ENDPOINT);
+    const url = new URL(LEETCODE_API_ENDPOINT);
     url.pathname = request.path;
     for (const key in request.query) {
       url.searchParams.append(key, request.query[key] as string);
