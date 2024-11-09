@@ -1,8 +1,8 @@
 FROM node:20-alpine
 
-COPY dist .
-COPY package.json .
-COPY asset asset
+COPY ./packages/server/dist .
+COPY ./packages/server/package.json .
+COPY ./packages/asset/dist asset
 
 ENV HOST=0.0.0.0
 ENV PORT=1234
