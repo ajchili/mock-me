@@ -26,14 +26,41 @@ export const InterviewerActions = () => {
   };
 
   const loadQuestion = async (titleSlug: string) => {
-    const { difficulty, question } = await LeetCodeApi.getQuestionByTitleSlug(
-      titleSlug
-    );
+    const { codeSnippets, difficulty, exampleTestcases, hints, question } =
+      await LeetCodeApi.getQuestionByTitleSlug(titleSlug);
 
-    writeToDoc("response", "function solution() {\n\t\n}");
+    // All of the below code is very stinky. But it kind of works!
+    const codeSnippet =
+      codeSnippets.find(
+        (codeSnippet: any) => codeSnippet.langSlug === "javascript"
+      )?.code ?? "// Your solution";
+
+    const { functionName } =
+      /((?<functionName>\w+) = function)/.exec(codeSnippet)?.groups ?? {};
+    console.log(functionName);
+
+    const response = [
+      codeSnippet,
+      "/** You can assume all code below this line works and that you do not need to modify it **/",
+      `const testCases = [${exampleTestcases.split("\n").join(",")}]`,
+      // This does not work when the function takes multiple arguments
+      `testCases.forEach(testCase => console.log(${functionName}(testCase)))`,
+    ].join("\n\n\n");
+
+    writeToDoc("response", response);
     writeToDoc(
       "prompt",
       `<div class="flex gap-1"><a href="https://leetcode.com/problems/${titleSlug}" target="_blank">${titleSlug}</a><span class="difficulty-badge ${difficulty.toLowerCase()}">${difficulty}</span></div><hr/>${question}`
+    );
+    writeToDoc(
+      "notes",
+      [
+        "## Notes",
+        "Write your notes here!",
+        "## Hints",
+        "> Consider giving hints to the candidate if they are struggling",
+        hints.map((hint: string) => `- ${hint}`).join("\n"),
+      ].join("\n\n")
     );
   };
 
