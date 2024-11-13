@@ -2,6 +2,8 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
 const prefix = `monaco-editor/esm/vs`;
+const proxyTarget = process.env.PROXY_TARGET || "localhost:1234";
+
 export default defineConfig({
   plugins: [react()],
   build: {
@@ -20,11 +22,11 @@ export default defineConfig({
   server: {
     proxy: {
       "/ws": {
-        target: "ws://localhost:1234",
+        target: `ws://${proxyTarget}`,
         ws: true,
         rewriteWsOrigin: true,
       },
-      "/api": "http://localhost:1234",
+      "/api": `http://${proxyTarget}`,
     },
   },
 });

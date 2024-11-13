@@ -1,6 +1,28 @@
-version: "3.8"
-
 services:
+  server:
+    build: ./packages/server
+    depends_on:
+      - leetcode
+    ports:
+      - "1234:1234"
+    environment:
+      - LEETCODE_API_ENDPOINT=http://leetcode:3000
+    restart: always
+    volumes:
+      - ./:/app
+    command: npm start -w packages/server
+  asset:
+    build: ./packages/asset
+    depends_on:
+      - server
+    ports:
+      - "5173:5173"
+    environment:
+      - PROXY_TARGET=server:1234
+    restart: always
+    volumes:
+      - ./:/app
+    command: npm start -w packages/asset -- --host
   leetcode:
     image: "ajchili/leetcode-api"
     ports:
