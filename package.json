@@ -3,7 +3,6 @@
   "packageManager": "npm@10.2.4",
   "scripts": {
     "build": "turbo run build",
-    "deploy": "turbo run deploy --force",
     "start": "turbo run start"
   },
   "workspaces": [
